@@ -36,7 +36,7 @@ public class Image extends AbstractImage {
 	 */
 	public void copyWithPreOrderTraversal(Iterator<Node> it1, Iterator<Node> it2) {
 		if (!it2.isEmpty()) {
-			it1.addValue(it2.getValue());
+			it1.addValue(Node.valueOf(it2.getValue().state));
 
 			it1.goLeft();
 			it2.goLeft();
@@ -172,11 +172,47 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public void intersection(AbstractImage image1, AbstractImage image2) {
-		System.out.println();
-		System.out.println("-------------------------------------------------");
-		System.out.println("Fonction a ecrire");
-		System.out.println("-------------------------------------------------");
-		System.out.println();
+		if (this == image1 && this == image2) {
+			return;
+		}
+
+		Iterator<Node> it = this.iterator();
+		Iterator<Node> it1 = image1.iterator();
+		Iterator<Node> it2 = image2.iterator();
+
+		it.clear(); // On vide l'arbre avant de faire l'union
+		intersectionAux(it, it1, it2);
+	}
+
+	private void intersectionAux(Iterator<Node> it, Iterator<Node> it1, Iterator<Node> it2) {
+		if (!it1.isEmpty() && !it2.isEmpty()) {
+			// On traite d'abord la racine
+			Node n1 = it1.getValue();
+			Node n2 = it2.getValue();
+			if (n1.state == 2 && n2.state == 1) {
+				copyWithPreOrderTraversal(it, it1);
+			} else if (n1.state == 1 && n2.state == 2) {
+				copyWithPreOrderTraversal(it, it2);
+			} else {
+				it.addValue(Node.valueOf(0));
+			}
+			// Ensuite on continue le parcours
+			it.goLeft();
+			it1.goLeft();
+			it2.goLeft();
+			intersectionAux(it, it1, it2);
+			it.goUp();
+			it1.goUp();
+			it2.goUp();
+
+			it.goRight();
+			it1.goRight();
+			it2.goRight();
+			intersectionAux(it, it1, it2);
+			it.goUp();
+			it1.goUp();
+			it2.goUp();
+		}
 	}
 
 	/**
@@ -202,7 +238,7 @@ public class Image extends AbstractImage {
 	}
 
 	private void unionAux(Iterator<Node> it, Iterator<Node> it1, Iterator<Node> it2) {
-		if (!it1.isEmpty() || !it2.isEmpty()) {
+		if (!it1.isEmpty() && !it2.isEmpty()) {
 			// On traite d'abord la racine
 			if (!it1.isEmpty() && it1.getValue().state == 1) {
 				System.out.println("image1 est totalement allumé");
