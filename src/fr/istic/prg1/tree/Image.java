@@ -193,6 +193,8 @@ public class Image extends AbstractImage {
 				copyWithPreOrderTraversal(it, it1);
 			} else if (n1.state == 1 && n2.state == 2) {
 				copyWithPreOrderTraversal(it, it2);
+			} else if (n1.state == 1 && n2.state == 1) {
+				it.addValue(Node.valueOf(1));
 			} else {
 				it.addValue(Node.valueOf(0));
 			}
@@ -226,7 +228,7 @@ public class Image extends AbstractImage {
 	@Override
 	public void union(AbstractImage image1, AbstractImage image2) {
 		if (this == image1 && this == image2) {
-			return; // Rien à unir
+			return; // Rien à faire
 		}
 
 		Iterator<Node> it = this.iterator();
@@ -240,27 +242,17 @@ public class Image extends AbstractImage {
 	private void unionAux(Iterator<Node> it, Iterator<Node> it1, Iterator<Node> it2) {
 		if (!it1.isEmpty() && !it2.isEmpty()) {
 			// On traite d'abord la racine
-			if (!it1.isEmpty() && it1.getValue().state == 1) {
-				System.out.println("image1 est totalement allumé");
-				it.addValue(it1.getValue());
-			} else if (!it2.isEmpty() && it2.getValue().state == 1) {
-				System.out.println("image2 est totalement allumé");
-				it.addValue(it2.getValue());
-			} else if (!it1.isEmpty() && !it2.isEmpty()) {
-				Node n1 = it1.getValue();
-				Node n2 = it2.getValue();
-				if (n1.state == 2 && n2.state == 0) {
-					System.out.println("image1 est partiellement allumé");
-					copyWithPreOrderTraversal(it, it1);
-				} else if (n1.state == 0 && n2.state == 2) {
-					System.out.println("image2 est partiellement allumé");
-					copyWithPreOrderTraversal(it, it2);
-				} else {
-					it.addValue(Node.valueOf(0));
-					System.out.println("image1 et image 2 sont éteints");
-				}
+			Node n1 = it1.getValue();
+			Node n2 = it2.getValue();
+			if (n1.state == 1 || n2.state == 1) {
+				it.addValue(Node.valueOf(1));
+			} else if (n1.state == 2 && n2.state == 0) {
+				copyWithPreOrderTraversal(it, it1);
+			} else if (n1.state == 0 && n2.state == 2) {
+				copyWithPreOrderTraversal(it, it2);
+			} else {
+				it.addValue(Node.valueOf(0));
 			}
-			System.out.println(toString());
 			// Ensuite on continue le parcours
 			it.goLeft();
 			it1.goLeft();
@@ -317,10 +309,12 @@ public class Image extends AbstractImage {
 				it.goLeft();
 				finX = middleX;
 				middleX = (debutX + finX) / 2;
+				System.out.println("goLeft() sur x");
 			} else {
 				it.goRight();
 				debutX = middleX;
 				middleX = (debutX + finX) / 2;
+				System.out.println("goRight() sur x");
 			}
 			// Découpage sur y
 			if (it.getValue().state == 2) {
@@ -328,15 +322,16 @@ public class Image extends AbstractImage {
 					it.goLeft();
 					finY = middleY;
 					middleY = (debutY + finY) / 2;
+					System.out.println("goLeft() sur y");
 				} else {
 					it.goRight();
 					debutY = middleY;
 					middleY = (debutY + finY) / 2;
+					System.out.println("goRight() sur y");
 				}
-			} else {
-				return it.getValue().state == 1;
 			}
 		}
+		System.out.println("Node state -> " + it.getValue().state);
 		return it.getValue().state == 1;
 	}
 
@@ -351,12 +346,42 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public boolean sameLeaf(int x1, int y1, int x2, int y2) {
-		System.out.println();
-		System.out.println("-------------------------------------------------");
-		System.out.println("Fonction a ecrire");
-		System.out.println("-------------------------------------------------");
-		System.out.println();
-		return false;
+		if (x1 == x2 && y1 == y2) {
+			return true;
+		}
+
+		int[] limits1 = { 0, 127, 255 };
+		int[] limits2 = { 0, 127, 255 };
+
+		Iterator<Node> it1 = this.iterator();
+		Iterator<Node> it2 = this.iterator();
+
+		while (it1.getValue().state == 2 && it2.getValue().state == 2) {
+			// Découpage sur x1 et x2
+			moveWithCoords(x1, limits1, it1);
+			moveWithCoords(x2, limits2, it2);
+			// Découpage sur y1
+			if (it1.getValue().state == 2) {
+				moveWithCoords(y1, limits1, it1);
+			}
+			// Découpage sur y2
+			if (it2.getValue().state == 2) {
+				moveWithCoords(y2, limits2, it2);
+			}
+		}
+		return it1.getValue() == it2.getValue();
+	}
+
+	private void moveWithCoords(int coord, int[] limits, Iterator<Node> it) {
+		// Découpage sur x
+		if (coord <= limits[1]) {
+			it.goLeft();
+			limits[2] = limits[1];
+		} else {
+			it.goRight();
+			limits[0] = limits[1];
+		}
+		limits[1] = (limits[0] + limits[2]) / 2;
 	}
 
 	/**
@@ -367,11 +392,37 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public boolean isIncludedIn(AbstractImage image2) {
-		System.out.println();
-		System.out.println("-------------------------------------------------");
-		System.out.println("Fonction a ecrire");
-		System.out.println("-------------------------------------------------");
-		System.out.println();
-		return false;
+		if (this == image2) {
+			return true;
+		}
+
+		Iterator<Node> it1 = this.iterator();
+		Iterator<Node> it2 = image2.iterator();
+
+		return isIncludedInAux(it1, it2);
+	}
+
+	public boolean isIncludedInAux(Iterator<Node> it1, Iterator<Node> it2) {
+		if (!it1.isEmpty() && !it2.isEmpty()) {
+			// On traite d'abord la racine
+			Node n1 = it1.getValue();
+			Node n2 = it2.getValue();
+			if (n1.state == 1 && (n2.state == 2 || n2.state == 0)) {
+				return false;
+			}
+			// Ensuite on continue le parcours
+			it1.goLeft();
+			it2.goLeft();
+			isIncludedInAux(it1, it2);
+			it1.goUp();
+			it2.goUp();
+
+			it1.goRight();
+			it2.goRight();
+			isIncludedInAux(it1, it2);
+			it1.goUp();
+			it2.goUp();
+		}
+		return true;
 	}
 }
