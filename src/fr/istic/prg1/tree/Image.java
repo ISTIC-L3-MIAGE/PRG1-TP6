@@ -93,11 +93,24 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public void videoInverse() {
-		System.out.println();
-		System.out.println("-------------------------------------------------");
-		System.out.println("Fonction a ecrire");
-		System.out.println("-------------------------------------------------");
-		System.out.println();
+		Iterator<Node> it = this.iterator();
+		videoInverseAux(it);
+	}
+
+	private void videoInverseAux(Iterator<Node> it) {
+		Node n = it.getValue();
+
+		if (n.state != 2) {
+			it.setValue(Node.valueOf(n.state == 1 ? 0 : 1));
+		} else {
+			it.goLeft();
+			videoInverseAux(it);
+			it.goUp();
+
+			it.goRight();
+			videoInverseAux(it);
+			it.goUp();
+		}
 	}
 
 	/**
@@ -294,17 +307,19 @@ public class Image extends AbstractImage {
 	/**
 	 * Attention : cette fonction ne doit pas utiliser la commande isPixelOn
 	 * 
-	 * @return true si tous les points de la forme (x, x) (avec 0 <= x <= 255)
-	 *         sont allumés dans this, false sinon
+	 * @return true si tous les points de la forme (x, x) (avec 0 <= x <= 255) sont
+	 *         allumés dans this, false sinon
 	 */
 	@Override
 	public boolean testDiagonal() {
+		// Opérationnel
 		Iterator<Node> it = this.iterator();
 		int x = testDiagonalAux(0, 255, 0, it);
 		return x == 256;
 	}
 
 	private int testDiagonalAux(int debut, int fin, int x, Iterator<Node> it) {
+		// Opérationnel
 		Node n = it.getValue();
 
 		if (n.state == 1 && x <= 255) {
@@ -350,6 +365,7 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public boolean isPixelOn(int x, int y) {
+		// Opérationnel
 		int debutX = 0, finX = 255;
 		int middleX = (debutX + finX) / 2;
 		int debutY = 0, finY = 255;
@@ -394,7 +410,7 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public boolean sameLeaf(int x1, int y1, int x2, int y2) {
-		// à corriger
+		// Opérationnel
 		if (x1 == x2 && y1 == y2) {
 			return true;
 		}
@@ -454,7 +470,7 @@ public class Image extends AbstractImage {
 		return isIncludedInAux(it1, it2);
 	}
 
-	public boolean isIncludedInAux(Iterator<Node> it1, Iterator<Node> it2) {
+	private boolean isIncludedInAux(Iterator<Node> it1, Iterator<Node> it2) {
 		// Passe une partie des tests
 		Node n1 = it1.getValue();
 		Node n2 = it2.getValue();
