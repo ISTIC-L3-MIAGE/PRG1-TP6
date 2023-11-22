@@ -151,6 +151,7 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public void mirrorV(AbstractImage image2) {
+		// Opérationnel
 		Iterator<Node> it1 = this.iterator();
 		Iterator<Node> it2 = image2.iterator();
 		// Si this == image2, on sauvegarde d'abord this dans une autre variable avant
@@ -166,6 +167,7 @@ public class Image extends AbstractImage {
 	}
 
 	private void mirroVAux(Iterator<Node> it1, Iterator<Node> it2, boolean isY) {
+		// Opérationnel
 		Node n2 = it2.getValue();
 		it1.addValue(Node.valueOf(n2.state));
 
@@ -200,6 +202,7 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public void mirrorH(AbstractImage image2) {
+		// Opérationnel
 		Iterator<Node> it1 = this.iterator();
 		Iterator<Node> it2 = image2.iterator();
 		// Si this == image2, on sauvegarde d'abord this dans une autre variable avant
@@ -215,6 +218,7 @@ public class Image extends AbstractImage {
 	}
 
 	private void mirroHAux(Iterator<Node> it1, Iterator<Node> it2, boolean isY) {
+		// Opérationnel
 		Node n2 = it2.getValue();
 		it1.addValue(Node.valueOf(n2.state));
 
@@ -350,7 +354,7 @@ public class Image extends AbstractImage {
 		unionAux(it, it1, it2);
 	}
 
-	private void unionAux(Iterator<Node> it, Iterator<Node> it1, Iterator<Node> it2) {
+	private int unionAux(Iterator<Node> it, Iterator<Node> it1, Iterator<Node> it2) {
 		Node n1 = it1.getValue();
 		Node n2 = it2.getValue();
 		// On traite d'abord la racine
@@ -368,7 +372,7 @@ public class Image extends AbstractImage {
 			it.goLeft();
 			it1.goLeft();
 			it2.goLeft();
-			unionAux(it, it1, it2);
+			int leftState = unionAux(it, it1, it2);
 			it.goUp();
 			it1.goUp();
 			it2.goUp();
@@ -376,11 +380,24 @@ public class Image extends AbstractImage {
 			it.goRight();
 			it1.goRight();
 			it2.goRight();
-			unionAux(it, it1, it2);
+			int rightState = unionAux(it, it1, it2);
 			it.goUp();
 			it1.goUp();
 			it2.goUp();
+			// On gère les cas (2,1,1) et (2,0,0)
+			// Mais ça marche pas encore
+			// if (leftState == rightState && leftState != 2) {
+			// it.goLeft();
+			// it.remove();
+			// it.goUp();
+			// it.goRight();
+			// it.remove();
+			// it.goUp();
+			// it.setValue(Node.valueOf(1));
+			// }
 		}
+
+		return it.getValue().state;
 	}
 
 	/**
