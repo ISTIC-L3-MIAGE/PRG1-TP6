@@ -301,16 +301,22 @@ public class Image extends AbstractImage {
 	public boolean testDiagonal() {
 		Iterator<Node> it = this.iterator();
 		int x = testDiagonalAux(0, 255, 0, it);
-		return x == 255;
+		return x == 256;
 	}
 
 	private int testDiagonalAux(int debut, int fin, int x, Iterator<Node> it) {
 		Node n = it.getValue();
-		if (n.state == 0) {
-			return x;
-		}
 
-		if (n.state == 2) {
+		if (n.state == 1 && x <= 255) {
+			// Si pixel de coords (x,x) est allumé, on test le suivant sur la diagonale
+			// (x+1,x+1)
+			System.out.println(x + " est allumé -> goRoot()"); // debug code
+			it.goRoot();
+			x = testDiagonalAux(0, 255, x + 1, it);
+
+		} else if (n.state == 2) {
+			// Si on a pas encore trouvé le noeud correspondant aux coords (x,x), on
+			// continue le parcours
 			int middle = (debut + fin) / 2;
 			if (x <= middle) {
 				it.goLeft();
@@ -319,6 +325,18 @@ public class Image extends AbstractImage {
 				it.goRight();
 				debut = middle + 1;
 			}
+
+			n = it.getValue();
+			if (n.state == 2) {
+				if (x <= middle) {
+					it.goLeft();
+					fin = middle;
+				} else {
+					it.goRight();
+					debut = middle + 1;
+				}
+			}
+			x = testDiagonalAux(debut, fin, x, it);
 		}
 
 		return x;

@@ -222,29 +222,22 @@ public class TestImage {
 	@Test
 	public void testPixel1() {
 		Image image1 = readFile(ARB1);
-		System.out.println(image1.toString());
 		boolean result = image1.isPixelOn(0, 128);
-		System.out.println("is pixel (0,128) on ? -> " + result);
 		assertTrue("pixel a1 0 128", result);
 
 		result = image1.isPixelOn(128, 0);
-		System.out.println("is pixel (128,0) on ? -> " + result);
 		assertTrue("pixel a1 128 0", !result);
 
 		result = image1.isPixelOn(192, 128);
-		System.out.println("is pixel (192,128) on ? -> " + result);
 		assertTrue("pixel a1 192 128", !result);
 
 		result = image1.isPixelOn(128, 192);
-		System.out.println("is pixel (128,192) on ? -> " + result);
 		assertTrue("pixel a1 128 192", !result);
 
 		result = image1.isPixelOn(255, 192);
-		System.out.println("is pixel (255,192) on ? -> " + result);
 		assertTrue("pixel a1 255 192", !result);
 
 		result = image1.isPixelOn(192, 255);
-		System.out.println("is pixel (192,255) on ? -> " + result);
 		assertTrue("pixel a1 192 255", !result);
 	}
 
