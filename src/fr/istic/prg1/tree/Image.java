@@ -299,12 +299,29 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public boolean testDiagonal() {
-		System.out.println();
-		System.out.println("-------------------------------------------------");
-		System.out.println("Fonction a ecrire");
-		System.out.println("-------------------------------------------------");
-		System.out.println();
-		return false;
+		Iterator<Node> it = this.iterator();
+		int x = testDiagonalAux(0, 255, 0, it);
+		return x == 255;
+	}
+
+	private int testDiagonalAux(int debut, int fin, int x, Iterator<Node> it) {
+		Node n = it.getValue();
+		if (n.state == 0) {
+			return x;
+		}
+
+		if (n.state == 2) {
+			int middle = (debut + fin) / 2;
+			if (x <= middle) {
+				it.goLeft();
+				fin = middle;
+			} else {
+				it.goRight();
+				debut = middle + 1;
+			}
+		}
+
+		return x;
 	}
 
 	/**
@@ -420,26 +437,30 @@ public class Image extends AbstractImage {
 	}
 
 	public boolean isIncludedInAux(Iterator<Node> it1, Iterator<Node> it2) {
-		if (!it1.isEmpty() && !it2.isEmpty()) {
-			// On traite d'abord la racine
-			Node n1 = it1.getValue();
-			Node n2 = it2.getValue();
-			if (n1.state == 1 && (n2.state == 2 || n2.state == 0)) {
-				return false;
-			}
-			// Ensuite on continue le parcours
+		// Passe une partie des tests
+		Node n1 = it1.getValue();
+		Node n2 = it2.getValue();
+		boolean inclusion = true;
+		// Si tout est allumé dans this alors que image2 est partiellement éteint ou
+		// totalement éteint, on renvoi false
+		if (n1.state == 1 && n2.state != 1) {
+			return false;
+		}
+
+		if (n1.state == 2 && n2.state == 2) {
 			it1.goLeft();
 			it2.goLeft();
-			isIncludedInAux(it1, it2);
+			inclusion &= isIncludedInAux(it1, it2);
 			it1.goUp();
 			it2.goUp();
 
 			it1.goRight();
 			it2.goRight();
-			isIncludedInAux(it1, it2);
+			inclusion &= isIncludedInAux(it1, it2);
 			it1.goUp();
 			it2.goUp();
 		}
-		return true;
+
+		return inclusion;
 	}
 }
