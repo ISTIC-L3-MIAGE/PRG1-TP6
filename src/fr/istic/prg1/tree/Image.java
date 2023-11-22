@@ -35,9 +35,9 @@ public class Image extends AbstractImage {
 	 * @param it2 itérateur de l’image à copier
 	 */
 	public void copyWithPreOrderTraversal(Iterator<Node> it1, Iterator<Node> it2) {
-		if (!it2.isEmpty()) {
-			it1.addValue(Node.valueOf(it2.getValue().state));
-
+		it1.addValue(Node.valueOf(it2.getValue().state));
+		// Seuls les noeud de state = 2 ont des fils
+		if (it2.getValue().state == 2) {
 			it1.goLeft();
 			it2.goLeft();
 			copyWithPreOrderTraversal(it1, it2);
@@ -116,10 +116,10 @@ public class Image extends AbstractImage {
 	}
 
 	private void mirroVAux(Iterator<Node> it1, Iterator<Node> it2) {
+		// On traite d'abord la racine
+		it1.addValue(Node.valueOf(it2.getValue().state));
+		// Ensuite on continue le parcours
 		if (it2.getValue().state == 2) {
-			// On traite d'abord la racine
-			it1.addValue(Node.valueOf(it2.getValue().state));
-			// Ensuite on continue le parcours
 			it2.goLeft();
 			it1.goRight();
 			mirroVAux(it1, it2);
@@ -199,7 +199,7 @@ public class Image extends AbstractImage {
 		Iterator<Node> it1 = image1.iterator();
 		Iterator<Node> it2 = image2.iterator();
 
-		it.clear(); // On vide l'arbre avant de faire l'union
+		it.clear(); // On vide l'arbre avant de faire l'intersection
 		intersectionAux(it, it1, it2);
 	}
 
@@ -259,20 +259,20 @@ public class Image extends AbstractImage {
 	}
 
 	private void unionAux(Iterator<Node> it, Iterator<Node> it1, Iterator<Node> it2) {
-		if (!it1.isEmpty() && !it2.isEmpty()) {
-			// On traite d'abord la racine
-			Node n1 = it1.getValue();
-			Node n2 = it2.getValue();
-			if (n1.state == 1 || n2.state == 1) {
-				it.addValue(Node.valueOf(1));
-			} else if (n1.state == 2 && n2.state == 0) {
-				copyWithPreOrderTraversal(it, it1);
-			} else if (n1.state == 0 && n2.state == 2) {
-				copyWithPreOrderTraversal(it, it2);
-			} else {
-				it.addValue(Node.valueOf(0));
-			}
-			// Ensuite on continue le parcours
+		Node n1 = it1.getValue();
+		Node n2 = it2.getValue();
+		// On traite d'abord la racine
+		if (n1.state == 1 || n2.state == 1) {
+			it.addValue(Node.valueOf(1));
+		} else if (n1.state == 2 && n2.state == 0) {
+			copyWithPreOrderTraversal(it, it1);
+		} else if (n1.state == 0 && n2.state == 2) {
+			copyWithPreOrderTraversal(it, it2);
+		} else {
+			it.addValue(Node.valueOf(0));
+		}
+
+		if (it1.getValue().state == 2 && it2.getValue().state == 2) {
 			it.goLeft();
 			it1.goLeft();
 			it2.goLeft();
@@ -327,24 +327,22 @@ public class Image extends AbstractImage {
 			if (y <= middleY) {
 				it.goLeft();
 				finY = middleY;
-				middleY = (debutY + finY) / 2;
-				System.out.println("goLeft() sur y");
 			} else {
 				it.goRight();
 				debutY = middleY + 1;
-				middleY = (debutY + finY) / 2;
 			}
+			middleY = (debutY + finY) / 2;
+
 			// Découpage sur x
 			if (it.getValue().state == 2) {
 				if (x <= middleX) {
 					it.goLeft();
 					finX = middleX;
-					middleX = (debutX + finX) / 2;
 				} else {
 					it.goRight();
 					debutX = middleX + 1;
-					middleX = (debutX + finX) / 2;
 				}
+				middleX = (debutX + finX) / 2;
 			}
 		}
 		return it.getValue().state == 1;
@@ -366,37 +364,41 @@ public class Image extends AbstractImage {
 			return true;
 		}
 
-		int[] limits1 = { 0, 127, 255 };
-		int[] limits2 = { 0, 127, 255 };
+		int debutX = 0, finX = 255;
+		int middleX = (debutX + finX) / 2;
+		int debutY = 0, finY = 255;
+		int middleY = (debutY + finY) / 2;
 
-		Iterator<Node> it1 = this.iterator();
-		Iterator<Node> it2 = this.iterator();
+		Iterator<Node> it = this.iterator();
 
-		while (it1.getValue().state == 2 && it2.getValue().state == 2) {
-			// Découpage sur y1 et y2
-			moveWithCoords(y1, limits1, it1);
-			moveWithCoords(y2, limits2, it2);
-			// Découpage sur x1
-			if (it1.getValue().state == 2) {
-				moveWithCoords(x1, limits1, it1);
+		while (it.getValue().state == 2) {
+			// Découpage sur y
+			if (y1 <= middleY && y2 <= middleY) {
+				it.goLeft();
+				finY = middleY;
+			} else if (y1 > middleY && y2 > middleY) {
+				it.goRight();
+				debutY = middleY + 1;
+			} else {
+				return false;
 			}
-			// Découpage sur x2
-			if (it2.getValue().state == 2) {
-				moveWithCoords(x2, limits2, it2);
+			middleY = (debutY + finY) / 2;
+
+			// Découpage sur x
+			if (it.getValue().state == 2) {
+				if (x1 <= middleX && x2 <= middleX) {
+					it.goLeft();
+					finX = middleX;
+				} else if (x1 > middleX && x2 > middleX) {
+					it.goRight();
+					debutX = middleX + 1;
+				} else {
+					return false;
+				}
+				middleX = (debutX + finX) / 2;
 			}
 		}
-		return it1.getValue() == it2.getValue();
-	}
-
-	private void moveWithCoords(int coord, int[] limits, Iterator<Node> it) {
-		if (coord <= limits[1]) {
-			it.goLeft();
-			limits[2] = limits[1];
-		} else {
-			it.goRight();
-			limits[0] = limits[1] + 1;
-		}
-		limits[1] = (limits[0] + limits[2]) / 2;
+		return true;
 	}
 
 	/**
