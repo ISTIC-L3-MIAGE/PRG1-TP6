@@ -108,11 +108,30 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public void mirrorV(AbstractImage image2) {
-		System.out.println();
-		System.out.println("-------------------------------------------------");
-		System.out.println("Fonction a ecrire");
-		System.out.println("-------------------------------------------------");
-		System.out.println();
+		Iterator<Node> it1 = this.iterator();
+		Iterator<Node> it2 = image2.iterator();
+
+		it1.clear(); // On vide l'arbre avant de faire le mirroir
+		mirroVAux(it1, it2);
+	}
+
+	private void mirroVAux(Iterator<Node> it1, Iterator<Node> it2) {
+		if (it2.getValue().state == 2) {
+			// On traite d'abord la racine
+			it1.addValue(Node.valueOf(it2.getValue().state));
+			// Ensuite on continue le parcours
+			it2.goLeft();
+			it1.goRight();
+			mirroVAux(it1, it2);
+			it2.goUp();
+			it1.goUp();
+
+			it2.goRight();
+			it1.goLeft();
+			mirroVAux(it1, it2);
+			it2.goUp();
+			it1.goUp();
+		}
 	}
 
 	/**
@@ -304,34 +323,30 @@ public class Image extends AbstractImage {
 		Iterator<Node> it = this.iterator();
 
 		while (it.getValue().state == 2) {
-			// Découpage sur x
-			if (x <= middleX) {
+			// Découpage sur y
+			if (y <= middleY) {
 				it.goLeft();
-				finX = middleX;
-				middleX = (debutX + finX) / 2;
-				System.out.println("goLeft() sur x");
+				finY = middleY;
+				middleY = (debutY + finY) / 2;
+				System.out.println("goLeft() sur y");
 			} else {
 				it.goRight();
-				debutX = middleX;
-				middleX = (debutX + finX) / 2;
-				System.out.println("goRight() sur x");
+				debutY = middleY + 1;
+				middleY = (debutY + finY) / 2;
 			}
-			// Découpage sur y
+			// Découpage sur x
 			if (it.getValue().state == 2) {
-				if (y <= middleY) {
+				if (x <= middleX) {
 					it.goLeft();
-					finY = middleY;
-					middleY = (debutY + finY) / 2;
-					System.out.println("goLeft() sur y");
+					finX = middleX;
+					middleX = (debutX + finX) / 2;
 				} else {
 					it.goRight();
-					debutY = middleY;
-					middleY = (debutY + finY) / 2;
-					System.out.println("goRight() sur y");
+					debutX = middleX + 1;
+					middleX = (debutX + finX) / 2;
 				}
 			}
 		}
-		System.out.println("Node state -> " + it.getValue().state);
 		return it.getValue().state == 1;
 	}
 
@@ -346,6 +361,7 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public boolean sameLeaf(int x1, int y1, int x2, int y2) {
+		// à corriger
 		if (x1 == x2 && y1 == y2) {
 			return true;
 		}
@@ -357,29 +373,28 @@ public class Image extends AbstractImage {
 		Iterator<Node> it2 = this.iterator();
 
 		while (it1.getValue().state == 2 && it2.getValue().state == 2) {
-			// Découpage sur x1 et x2
-			moveWithCoords(x1, limits1, it1);
-			moveWithCoords(x2, limits2, it2);
-			// Découpage sur y1
+			// Découpage sur y1 et y2
+			moveWithCoords(y1, limits1, it1);
+			moveWithCoords(y2, limits2, it2);
+			// Découpage sur x1
 			if (it1.getValue().state == 2) {
-				moveWithCoords(y1, limits1, it1);
+				moveWithCoords(x1, limits1, it1);
 			}
-			// Découpage sur y2
+			// Découpage sur x2
 			if (it2.getValue().state == 2) {
-				moveWithCoords(y2, limits2, it2);
+				moveWithCoords(x2, limits2, it2);
 			}
 		}
 		return it1.getValue() == it2.getValue();
 	}
 
 	private void moveWithCoords(int coord, int[] limits, Iterator<Node> it) {
-		// Découpage sur x
 		if (coord <= limits[1]) {
 			it.goLeft();
 			limits[2] = limits[1];
 		} else {
 			it.goRight();
-			limits[0] = limits[1];
+			limits[0] = limits[1] + 1;
 		}
 		limits[1] = (limits[0] + limits[2]) / 2;
 	}
