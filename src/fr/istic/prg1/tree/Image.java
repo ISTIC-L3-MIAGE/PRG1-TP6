@@ -79,11 +79,39 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public void rotate180(AbstractImage image2) {
-		System.out.println();
-		System.out.println("-------------------------------------------------");
-		System.out.println("Fonction a ecrire");
-		System.out.println("-------------------------------------------------");
-		System.out.println();
+		// Opérationnel
+		Iterator<Node> it1 = this.iterator();
+		Iterator<Node> it2 = image2.iterator();
+		// Si this == image2, on sauvegarde d'abord this dans une autre variable avant
+		// de faire la rotation
+		if (this == image2) {
+			AbstractImage imgTemp = new Image();
+			imgTemp.affect(this);
+			it2 = imgTemp.iterator();
+		}
+
+		it1.clear(); // On vide l'arbre avant de faire la rotation
+		rotate180Aux(it1, it2);
+	}
+
+	private void rotate180Aux(Iterator<Node> it1, Iterator<Node> it2) {
+		// Opérationnel
+		Node n2 = it2.getValue();
+		it1.addValue(Node.valueOf(n2.state));
+
+		if (n2.state == 2) {
+			it2.goLeft();
+			it1.goRight();
+			rotate180Aux(it1, it2);
+			it2.goUp();
+			it1.goUp();
+
+			it2.goRight();
+			it1.goLeft();
+			rotate180Aux(it1, it2);
+			it2.goUp();
+			it1.goUp();
+		}
 	}
 
 	/**
@@ -93,11 +121,13 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public void videoInverse() {
+		// Opérationnel
 		Iterator<Node> it = this.iterator();
 		videoInverseAux(it);
 	}
 
 	private void videoInverseAux(Iterator<Node> it) {
+		// Opérationnel
 		Node n = it.getValue();
 
 		if (n.state != 2) {
@@ -123,25 +153,40 @@ public class Image extends AbstractImage {
 	public void mirrorV(AbstractImage image2) {
 		Iterator<Node> it1 = this.iterator();
 		Iterator<Node> it2 = image2.iterator();
+		// Si this == image2, on sauvegarde d'abord this dans une autre variable avant
+		// de faire le mirroir
+		if (this == image2) {
+			AbstractImage imgTemp = new Image();
+			imgTemp.affect(this);
+			it2 = imgTemp.iterator();
+		}
 
 		it1.clear(); // On vide l'arbre avant de faire le mirroir
-		mirroVAux(it1, it2);
+		mirroVAux(it1, it2, false);
 	}
 
-	private void mirroVAux(Iterator<Node> it1, Iterator<Node> it2) {
-		// On traite d'abord la racine
-		it1.addValue(Node.valueOf(it2.getValue().state));
-		// Ensuite on continue le parcours
+	private void mirroVAux(Iterator<Node> it1, Iterator<Node> it2, boolean isY) {
+		Node n2 = it2.getValue();
+		it1.addValue(Node.valueOf(n2.state));
+
 		if (it2.getValue().state == 2) {
 			it2.goLeft();
-			it1.goRight();
-			mirroVAux(it1, it2);
+			if (isY) {
+				it1.goLeft();
+			} else {
+				it1.goRight();
+			}
+			mirroVAux(it1, it2, !isY);
 			it2.goUp();
 			it1.goUp();
 
 			it2.goRight();
-			it1.goLeft();
-			mirroVAux(it1, it2);
+			if (isY) {
+				it1.goRight();
+			} else {
+				it1.goLeft();
+			}
+			mirroVAux(it1, it2, !isY);
 			it2.goUp();
 			it1.goUp();
 		}
@@ -155,11 +200,45 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public void mirrorH(AbstractImage image2) {
-		System.out.println();
-		System.out.println("-------------------------------------------------");
-		System.out.println("Fonction a ecrire");
-		System.out.println("-------------------------------------------------");
-		System.out.println();
+		Iterator<Node> it1 = this.iterator();
+		Iterator<Node> it2 = image2.iterator();
+		// Si this == image2, on sauvegarde d'abord this dans une autre variable avant
+		// de faire le mirroir
+		if (this == image2) {
+			AbstractImage imgTemp = new Image();
+			imgTemp.affect(this);
+			it2 = imgTemp.iterator();
+		}
+
+		it1.clear(); // On vide l'arbre avant de faire le mirroir
+		mirroHAux(it1, it2, true);
+	}
+
+	private void mirroHAux(Iterator<Node> it1, Iterator<Node> it2, boolean isY) {
+		Node n2 = it2.getValue();
+		it1.addValue(Node.valueOf(n2.state));
+
+		if (it2.getValue().state == 2) {
+			it2.goLeft();
+			if (isY) {
+				it1.goLeft();
+			} else {
+				it1.goRight();
+			}
+			mirroHAux(it1, it2, !isY);
+			it2.goUp();
+			it1.goUp();
+
+			it2.goRight();
+			if (isY) {
+				it1.goRight();
+			} else {
+				it1.goLeft();
+			}
+			mirroHAux(it1, it2, !isY);
+			it2.goUp();
+			it1.goUp();
+		}
 	}
 
 	/**
