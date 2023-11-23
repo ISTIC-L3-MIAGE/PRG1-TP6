@@ -35,9 +35,11 @@ public class Image extends AbstractImage {
 	 * @param it2 itérateur de l’image à copier
 	 */
 	public void copyWithPreOrderTraversal(Iterator<Node> it1, Iterator<Node> it2) {
-		it1.addValue(Node.valueOf(it2.getValue().state));
-		// Seuls les noeud de state = 2 ont des fils
-		if (it2.getValue().state == 2) {
+		// Opérationnel
+		Node n2 = it2.getValue();
+		it1.addValue(Node.valueOf(n2.state));
+		// Seuls les noeuds de state = 2 ont des fils
+		if (n2.state == 2) {
 			it1.goLeft();
 			it2.goLeft();
 			copyWithPreOrderTraversal(it1, it2);
@@ -53,6 +55,15 @@ public class Image extends AbstractImage {
 	}
 
 	/**
+	 * Crée une copie temporaire de this et retourne son itérateur
+	 */
+	private Iterator<Node> iteratorClone() {
+		AbstractImage imgTemp = new Image();
+		imgTemp.affect(this);
+		return imgTemp.iterator();
+	}
+
+	/**
 	 * this devient identique à image2.
 	 *
 	 * @param image2 image à copier
@@ -60,6 +71,7 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public void affect(AbstractImage image2) {
+		// Opérationnel
 		if (this == image2) {
 			return; // Rien à affecter
 		}
@@ -82,18 +94,22 @@ public class Image extends AbstractImage {
 		// Opérationnel
 		Iterator<Node> it1 = this.iterator();
 		Iterator<Node> it2 = image2.iterator();
-		// Si this == image2, on sauvegarde d'abord this dans une autre variable avant
-		// de faire la rotation
+		// Si this == image2, on affecte d'abord this à une autre image
+		// avant de faire la rotation
 		if (this == image2) {
-			AbstractImage imgTemp = new Image();
-			imgTemp.affect(this);
-			it2 = imgTemp.iterator();
+			it2 = iteratorClone();
 		}
 
 		it1.clear(); // On vide l'arbre avant de faire la rotation
 		rotate180Aux(it1, it2);
 	}
 
+	/**
+	 * Fonction auxiliaire utile pour réaliser rotate180
+	 *
+	 * @param it1 itérateur de this
+	 * @param it2 itérateur de l’image dont il faut faire la rotation
+	 */
 	private void rotate180Aux(Iterator<Node> it1, Iterator<Node> it2) {
 		// Opérationnel
 		Node n2 = it2.getValue();
@@ -126,11 +142,17 @@ public class Image extends AbstractImage {
 		videoInverseAux(it);
 	}
 
+	/**
+	 * Fonction auxiliaire utile pour réaliser videoInverse
+	 *
+	 * @param it itérateur de this
+	 */
 	private void videoInverseAux(Iterator<Node> it) {
 		// Opérationnel
 		Node n = it.getValue();
 
 		if (n.state != 2) {
+			// Chaque noeud != 2 reçoit l'inverse de son état actuel
 			it.setValue(Node.valueOf(n.state == 1 ? 0 : 1));
 		} else {
 			it.goLeft();
@@ -154,44 +176,14 @@ public class Image extends AbstractImage {
 		// Opérationnel
 		Iterator<Node> it1 = this.iterator();
 		Iterator<Node> it2 = image2.iterator();
-		// Si this == image2, on sauvegarde d'abord this dans une autre variable avant
-		// de faire le mirroir
+		// Si this == image2, on affecte d'abord this à une autre image
+		// avant de faire le mirroir
 		if (this == image2) {
-			AbstractImage imgTemp = new Image();
-			imgTemp.affect(this);
-			it2 = imgTemp.iterator();
+			it2 = iteratorClone();
 		}
 
 		it1.clear(); // On vide l'arbre avant de faire le mirroir
-		mirroVAux(it1, it2, false);
-	}
-
-	private void mirroVAux(Iterator<Node> it1, Iterator<Node> it2, boolean isY) {
-		// Opérationnel
-		Node n2 = it2.getValue();
-		it1.addValue(Node.valueOf(n2.state));
-
-		if (it2.getValue().state == 2) {
-			it2.goLeft();
-			if (isY) {
-				it1.goLeft();
-			} else {
-				it1.goRight();
-			}
-			mirroVAux(it1, it2, !isY);
-			it2.goUp();
-			it1.goUp();
-
-			it2.goRight();
-			if (isY) {
-				it1.goRight();
-			} else {
-				it1.goLeft();
-			}
-			mirroVAux(it1, it2, !isY);
-			it2.goUp();
-			it1.goUp();
-		}
+		mirrorAux(it1, it2, false);
 	}
 
 	/**
@@ -205,31 +197,36 @@ public class Image extends AbstractImage {
 		// Opérationnel
 		Iterator<Node> it1 = this.iterator();
 		Iterator<Node> it2 = image2.iterator();
-		// Si this == image2, on sauvegarde d'abord this dans une autre variable avant
-		// de faire le mirroir
+		// Si this == image2, on affecte d'abord this à une autre image
+		// avant de faire le mirroir
 		if (this == image2) {
-			AbstractImage imgTemp = new Image();
-			imgTemp.affect(this);
-			it2 = imgTemp.iterator();
+			it2 = iteratorClone();
 		}
 
 		it1.clear(); // On vide l'arbre avant de faire le mirroir
-		mirroHAux(it1, it2, true);
+		mirrorAux(it1, it2, true);
 	}
 
-	private void mirroHAux(Iterator<Node> it1, Iterator<Node> it2, boolean isY) {
+	/**
+	 * Fonction auxiliaire utile pour réaliser mirrorV et mirrorH
+	 *
+	 * @param it1 itérateur de this
+	 * @param it2 itérateur de l’image dont il faut faire le mirroir
+	 * @param isY doit prendre true si on commence par découper sur y, false sinon
+	 */
+	private void mirrorAux(Iterator<Node> it1, Iterator<Node> it2, boolean isY) {
 		// Opérationnel
 		Node n2 = it2.getValue();
 		it1.addValue(Node.valueOf(n2.state));
 
-		if (it2.getValue().state == 2) {
+		if (n2.state == 2) {
 			it2.goLeft();
 			if (isY) {
 				it1.goLeft();
 			} else {
 				it1.goRight();
 			}
-			mirroHAux(it1, it2, !isY);
+			mirrorAux(it1, it2, !isY);
 			it2.goUp();
 			it1.goUp();
 
@@ -239,7 +236,7 @@ public class Image extends AbstractImage {
 			} else {
 				it1.goLeft();
 			}
-			mirroHAux(it1, it2, !isY);
+			mirrorAux(it1, it2, !isY);
 			it2.goUp();
 			it1.goUp();
 		}
@@ -414,20 +411,28 @@ public class Image extends AbstractImage {
 		return x == 256;
 	}
 
+	/**
+	 * Fonction auxiliaire utile pour réaliser testDiagonal
+	 *
+	 * @param debut début de l'intervalle dans lequel il faut circuler
+	 * @param fin   fin de l'intervalle dans lequel il faut circuler
+	 * @param x     coordonnée du point de la diagonale à vérifier
+	 * @param it    itérateur de this
+	 * @return la coordonnée du dernier pixel de la diagonale qui a été testé
+	 */
 	private int testDiagonalAux(int debut, int fin, int x, Iterator<Node> it) {
 		// Opérationnel
 		Node n = it.getValue();
 
 		if (n.state == 1 && x <= 255) {
-			// Si pixel de coords (x,x) est allumé, on test le suivant sur la diagonale
-			// (x+1,x+1)
-			System.out.println(x + " est allumé -> goRoot()"); // debug code
+			// Si pixel de coords (x,x) est allumé,
+			// on test le suivant (x+1,x+1) sur la diagonale
 			it.goRoot();
 			x = testDiagonalAux(0, 255, x + 1, it);
 
 		} else if (n.state == 2) {
-			// Si on a pas encore trouvé le noeud correspondant aux coords (x,x), on
-			// continue le parcours
+			// Si on a pas encore trouvé le noeud correspondant aux coords (x,x),
+			// on continue le parcours
 			int middle = (debut + fin) / 2;
 			if (x <= middle) {
 				it.goLeft();
