@@ -58,6 +58,7 @@ public class Image extends AbstractImage {
 	 * Crée une copie temporaire de this et retourne son itérateur
 	 */
 	private Iterator<Node> iteratorClone() {
+		// Opérationnel
 		AbstractImage imgTemp = new Image();
 		imgTemp.affect(this);
 		return imgTemp.iterator();
@@ -284,8 +285,9 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public void intersection(AbstractImage image1, AbstractImage image2) {
+		// Opérationnel
 		if (this == image1 && this == image2) {
-			return;
+			return; // Rien à faire
 		}
 
 		Iterator<Node> it = this.iterator();
@@ -296,25 +298,35 @@ public class Image extends AbstractImage {
 		intersectionAux(it, it1, it2);
 	}
 
-	private void intersectionAux(Iterator<Node> it, Iterator<Node> it1, Iterator<Node> it2) {
-		if (!it1.isEmpty() && !it2.isEmpty()) {
-			// On traite d'abord la racine
-			Node n1 = it1.getValue();
-			Node n2 = it2.getValue();
-			if (n1.state == 2 && n2.state == 1) {
-				copyWithPreOrderTraversal(it, it1);
-			} else if (n1.state == 1 && n2.state == 2) {
-				copyWithPreOrderTraversal(it, it2);
-			} else if (n1.state == 1 && n2.state == 1) {
-				it.addValue(Node.valueOf(1));
-			} else {
-				it.addValue(Node.valueOf(0));
-			}
-			// Ensuite on continue le parcours
+	/**
+	 * Fonction auxiliaire utile pour réaliser intersection
+	 *
+	 * @param it  itérateur de this
+	 * @param it1 itérateur de l’image 1
+	 * @param it2 itérateur de l’image 2
+	 */
+	private int intersectionAux(Iterator<Node> it, Iterator<Node> it1, Iterator<Node> it2) {
+		// Opérationnel
+		// On traite d'abord la racine
+		Node n1 = it1.getValue();
+		Node n2 = it2.getValue();
+		if (n1.state == 2 && n2.state == 1) {
+			copyWithPreOrderTraversal(it, it1);
+		} else if (n1.state == 1 && n2.state == 2) {
+			copyWithPreOrderTraversal(it, it2);
+		} else if (n1.state == 2 && n2.state == 2) {
+			it.addValue(Node.valueOf(2));
+		} else if (n1.state == 1 && n2.state == 1) {
+			it.addValue(Node.valueOf(1));
+		} else {
+			it.addValue(Node.valueOf(0));
+		}
+		// Ensuite on continue le parcours
+		if (n1.state == 2 && n2.state == 2) {
 			it.goLeft();
 			it1.goLeft();
 			it2.goLeft();
-			intersectionAux(it, it1, it2);
+			int leftState = intersectionAux(it, it1, it2);
 			it.goUp();
 			it1.goUp();
 			it2.goUp();
@@ -322,11 +334,26 @@ public class Image extends AbstractImage {
 			it.goRight();
 			it1.goRight();
 			it2.goRight();
-			intersectionAux(it, it1, it2);
+			int rightState = intersectionAux(it, it1, it2);
 			it.goUp();
 			it1.goUp();
 			it2.goUp();
+			// On gère les cas (2,1,1) et (2,0,0)
+			if (leftState == rightState && leftState != 2) {
+				// On retire le fils gauche
+				it.goLeft();
+				it.remove();
+				it.goUp();
+				// On retire le fils droit
+				it.goRight();
+				it.remove();
+				it.goUp();
+				// On remplace le père par 1 ou 0
+				it.setValue(Node.valueOf(leftState));
+			}
 		}
+
+		return it.getValue().state;
 	}
 
 	/**
@@ -339,6 +366,7 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public void union(AbstractImage image1, AbstractImage image2) {
+		// Opérationnel
 		if (this == image1 && this == image2) {
 			return; // Rien à faire
 		}
@@ -351,7 +379,15 @@ public class Image extends AbstractImage {
 		unionAux(it, it1, it2);
 	}
 
+	/**
+	 * Fonction auxiliaire utile pour réaliser union
+	 *
+	 * @param it  itérateur de this
+	 * @param it1 itérateur de l’image 1
+	 * @param it2 itérateur de l’image 2
+	 */
 	private int unionAux(Iterator<Node> it, Iterator<Node> it1, Iterator<Node> it2) {
+		// Opérationnel
 		Node n1 = it1.getValue();
 		Node n2 = it2.getValue();
 		// On traite d'abord la racine
@@ -361,11 +397,13 @@ public class Image extends AbstractImage {
 			copyWithPreOrderTraversal(it, it1);
 		} else if (n1.state == 0 && n2.state == 2) {
 			copyWithPreOrderTraversal(it, it2);
+		} else if (n1.state == 2 && n2.state == 2) {
+			it.addValue(Node.valueOf(2));
 		} else {
 			it.addValue(Node.valueOf(0));
 		}
-
-		if (it1.getValue().state == 2 && it2.getValue().state == 2) {
+		// Ensuite on continue le parcours
+		if (n1.state == 2 && n2.state == 2) {
 			it.goLeft();
 			it1.goLeft();
 			it2.goLeft();
@@ -382,16 +420,18 @@ public class Image extends AbstractImage {
 			it1.goUp();
 			it2.goUp();
 			// On gère les cas (2,1,1) et (2,0,0)
-			// Mais ça marche pas encore
-			// if (leftState == rightState && leftState != 2) {
-			// it.goLeft();
-			// it.remove();
-			// it.goUp();
-			// it.goRight();
-			// it.remove();
-			// it.goUp();
-			// it.setValue(Node.valueOf(1));
-			// }
+			if (leftState == rightState && leftState != 2) {
+				// On retire le fils gauche
+				it.goLeft();
+				it.remove();
+				it.goUp();
+				// On retire le fils droit
+				it.goRight();
+				it.remove();
+				it.goUp();
+				// On remplace le père par 1 ou 0
+				it.setValue(Node.valueOf(leftState));
+			}
 		}
 
 		return it.getValue().state;
