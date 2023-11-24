@@ -254,7 +254,7 @@ public class Image extends AbstractImage {
 	public void zoomIn(AbstractImage image2) {
 		System.out.println();
 		System.out.println("-------------------------------------------------");
-		System.out.println("Fonction a ecrire");
+		System.out.println("Bon appétit Anto 🤭");
 		System.out.println("-------------------------------------------------");
 		System.out.println();
 	}
@@ -270,7 +270,7 @@ public class Image extends AbstractImage {
 	public void zoomOut(AbstractImage image2) {
 		System.out.println();
 		System.out.println("-------------------------------------------------");
-		System.out.println("Fonction a ecrire");
+		System.out.println("Bon appétit Anto 🤭");
 		System.out.println("-------------------------------------------------");
 		System.out.println();
 	}
@@ -601,6 +601,7 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public boolean isIncludedIn(AbstractImage image2) {
+		// Opérationnel
 		if (this == image2) {
 			return true;
 		}
@@ -612,14 +613,14 @@ public class Image extends AbstractImage {
 	}
 
 	private boolean isIncludedInAux(Iterator<Node> it1, Iterator<Node> it2) {
-		// Passe une partie des tests
+		// Opérationnel
 		Node n1 = it1.getValue();
 		Node n2 = it2.getValue();
 		boolean inclusion = true;
-		// Si tout est allumé dans this alors que image2 est partiellement éteint ou
+		// Si tout est allumé dans this alors que image2 est partiellement ou
 		// totalement éteint, on renvoi false
-		if (n1.state == 1 && n2.state != 1) {
-			return false;
+		if ((n1.state == 1 && n2.state != 1) || (n1.state == 2 && n2.state == 0)) {
+			inclusion = false;
 		}
 
 		if (n1.state == 2 && n2.state == 2) {
