@@ -252,11 +252,19 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public void zoomIn(AbstractImage image2) {
-		System.out.println();
-		System.out.println("-------------------------------------------------");
-		System.out.println("Bon appétit Anto 🤭");
-		System.out.println("-------------------------------------------------");
-		System.out.println();
+		Iterator <Node> it = this.iterator();
+		Iterator <Node> it2 = image2.iterator();
+		int compteur = 0;
+		if(!image2.isEmpty()) {
+			it.clear();
+			while(it2.getValue().state ==2 && compteur <2) {
+				it2.goLeft();
+				compteur+=1;
+			}
+			copyWithPreOrderTraversal(it, it2);
+		}
+		
+		
 	}
 
 	/**
