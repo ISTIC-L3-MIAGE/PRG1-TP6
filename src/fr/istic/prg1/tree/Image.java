@@ -340,16 +340,10 @@ public class Image extends AbstractImage {
 			it2.goUp();
 			// On gère les cas (2,1,1) et (2,0,0)
 			if (leftState == rightState && leftState != 2) {
-				// On retire le fils gauche
-				it.goLeft();
-				it.remove();
-				it.goUp();
-				// On retire le fils droit
-				it.goRight();
-				it.remove();
-				it.goUp();
+				// On retire les deux fils
+				it.clear();
 				// On remplace le père par 1 ou 0
-				it.setValue(Node.valueOf(leftState));
+				it.addValue(Node.valueOf(leftState));
 			}
 		}
 
@@ -421,16 +415,10 @@ public class Image extends AbstractImage {
 			it2.goUp();
 			// On gère les cas (2,1,1) et (2,0,0)
 			if (leftState == rightState && leftState != 2) {
-				// On retire le fils gauche
-				it.goLeft();
-				it.remove();
-				it.goUp();
-				// On retire le fils droit
-				it.goRight();
-				it.remove();
-				it.goUp();
+				// On retire les deux fils
+				it.clear();
 				// On remplace le père par 1 ou 0
-				it.setValue(Node.valueOf(leftState));
+				it.addValue(Node.valueOf(leftState));
 			}
 		}
 
