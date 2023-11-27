@@ -7,6 +7,6 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/5"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="D:/JAVA PROJECT/PRG1-TP6/tp-arbres.jar"/>
+	<classpathentry kind="lib" path="D:/Home/etahi/Documents/PRG1/CorrectionAnnales/tp-arbres.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

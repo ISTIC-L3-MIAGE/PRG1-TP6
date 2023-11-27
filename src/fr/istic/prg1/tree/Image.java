@@ -35,7 +35,7 @@ public class Image extends AbstractImage {
 	 * @param it2 itérateur de l’image à copier
 	 */
 	public void copyWithPreOrderTraversal(Iterator<Node> it1, Iterator<Node> it2) {
-		// Opérationnel
+		// On traite d'abord la racine
 		Node n2 = it2.getValue();
 		it1.addValue(Node.valueOf(n2.state));
 		// Seuls les noeuds de state = 2 ont des fils
@@ -58,7 +58,6 @@ public class Image extends AbstractImage {
 	 * Crée une copie temporaire de this et retourne son itérateur
 	 */
 	private Iterator<Node> iteratorClone() {
-		// Opérationnel
 		AbstractImage imgTemp = new Image();
 		imgTemp.affect(this);
 		return imgTemp.iterator();
@@ -72,7 +71,6 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public void affect(AbstractImage image2) {
-		// Opérationnel
 		if (this == image2) {
 			return; // Rien à affecter
 		}
@@ -92,7 +90,6 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public void rotate180(AbstractImage image2) {
-		// Opérationnel
 		Iterator<Node> it1 = this.iterator();
 		Iterator<Node> it2 = image2.iterator();
 		// Si this == image2, on affecte d'abord this à une autre image
@@ -112,7 +109,6 @@ public class Image extends AbstractImage {
 	 * @param it2 itérateur de l’image dont il faut faire la rotation
 	 */
 	private void rotate180Aux(Iterator<Node> it1, Iterator<Node> it2) {
-		// Opérationnel
 		Node n2 = it2.getValue();
 		it1.addValue(Node.valueOf(n2.state));
 
@@ -138,7 +134,6 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public void videoInverse() {
-		// Opérationnel
 		Iterator<Node> it = this.iterator();
 		videoInverseAux(it);
 	}
@@ -149,7 +144,6 @@ public class Image extends AbstractImage {
 	 * @param it itérateur de this
 	 */
 	private void videoInverseAux(Iterator<Node> it) {
-		// Opérationnel
 		Node n = it.getValue();
 
 		if (n.state != 2) {
@@ -174,7 +168,6 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public void mirrorV(AbstractImage image2) {
-		// Opérationnel
 		Iterator<Node> it1 = this.iterator();
 		Iterator<Node> it2 = image2.iterator();
 		// Si this == image2, on affecte d'abord this à une autre image
@@ -195,7 +188,6 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public void mirrorH(AbstractImage image2) {
-		// Opérationnel
 		Iterator<Node> it1 = this.iterator();
 		Iterator<Node> it2 = image2.iterator();
 		// Si this == image2, on affecte d'abord this à une autre image
@@ -211,33 +203,33 @@ public class Image extends AbstractImage {
 	/**
 	 * Fonction auxiliaire utile pour réaliser mirrorV et mirrorH
 	 *
-	 * @param it1 itérateur de this
-	 * @param it2 itérateur de l’image dont il faut faire le mirroir
-	 * @param isY doit prendre true si on commence par découper sur y, false sinon
+	 * @param it1    itérateur de this
+	 * @param it2    itérateur de l’image dont il faut faire le mirroir
+	 * @param follow doit prendre false au départ pour réaliser mirrorV et true au
+	 *               départ pour réaliser mirrorH
 	 */
-	private void mirrorAux(Iterator<Node> it1, Iterator<Node> it2, boolean isY) {
-		// Opérationnel
+	private void mirrorAux(Iterator<Node> it1, Iterator<Node> it2, boolean follow) {
 		Node n2 = it2.getValue();
 		it1.addValue(Node.valueOf(n2.state));
 
 		if (n2.state == 2) {
 			it2.goLeft();
-			if (isY) {
+			if (follow) {
 				it1.goLeft();
 			} else {
 				it1.goRight();
 			}
-			mirrorAux(it1, it2, !isY);
+			mirrorAux(it1, it2, !follow);
 			it2.goUp();
 			it1.goUp();
 
 			it2.goRight();
-			if (isY) {
+			if (follow) {
 				it1.goRight();
 			} else {
 				it1.goLeft();
 			}
-			mirrorAux(it1, it2, !isY);
+			mirrorAux(it1, it2, !follow);
 			it2.goUp();
 			it1.goUp();
 		}
@@ -252,19 +244,24 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public void zoomIn(AbstractImage image2) {
-		Iterator <Node> it = this.iterator();
-		Iterator <Node> it2 = image2.iterator();
+		Iterator<Node> it1 = this.iterator();
+		Iterator<Node> it2 = image2.iterator();
 		int compteur = 0;
-		if(!image2.isEmpty()) {
-			it.clear();
-			while(it2.getValue().state ==2 && compteur <2) {
-				it2.goLeft();
-				compteur+=1;
-			}
-			copyWithPreOrderTraversal(it, it2);
+		// Si this == image2, on affecte d'abord this à une autre image
+		// avant de faire le zoom
+		if (this == image2) {
+			it2 = iteratorClone();
 		}
-		
-		
+
+		it1.clear();
+		// On descends deux fois à gauche dans la mesure du possible pour tomber dans le
+		// sous arbre représentant le quart supérieur gauche de image2
+		while (it2.getValue().state == 2 && compteur < 2) {
+			it2.goLeft();
+			compteur++;
+		}
+		// Ensuite on copie ce sous arbre dans this
+		copyWithPreOrderTraversal(it1, it2);
 	}
 
 	/**
@@ -276,11 +273,29 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public void zoomOut(AbstractImage image2) {
-		System.out.println();
-		System.out.println("-------------------------------------------------");
-		System.out.println("Bon appétit Anto 🤭");
-		System.out.println("-------------------------------------------------");
-		System.out.println();
+		Iterator<Node> it1 = this.iterator();
+		Iterator<Node> it2 = image2.iterator();
+		int compteur = 0;
+		// Si this == image2, on affecte d'abord this à une autre image
+		// avant de faire le zoom
+		if (this == image2) {
+			it2 = iteratorClone();
+		}
+
+		it1.clear();
+		if (it2.getValue().state == 0) {
+			it1.addValue(Node.valueOf(0));
+		} else {
+			while (compteur < 2) {
+				it1.addValue(Node.valueOf(2));
+				it1.goRight();
+				it1.addValue(Node.valueOf(0));
+				it1.goUp();
+				it1.goLeft();
+				compteur++;
+			}
+			copyWithPreOrderTraversal(it1, it2);
+		}
 	}
 
 	/**
@@ -293,7 +308,6 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public void intersection(AbstractImage image1, AbstractImage image2) {
-		// Opérationnel
 		if (this == image1 && this == image2) {
 			return; // Rien à faire
 		}
@@ -314,23 +328,24 @@ public class Image extends AbstractImage {
 	 * @param it2 itérateur de l’image 2
 	 */
 	private int intersectionAux(Iterator<Node> it, Iterator<Node> it1, Iterator<Node> it2) {
-		// Opérationnel
-		// On traite d'abord la racine
+		// On fait d'abord l'intersection des racines
 		Node n1 = it1.getValue();
 		Node n2 = it2.getValue();
-		if (n1.state == 2 && n2.state == 1) {
+
+		if (n1.state == 0 || n2.state == 0) {
+			it.addValue(Node.valueOf(0));
+		} else if (n1.state == 2 && n2.state == 1) {
 			copyWithPreOrderTraversal(it, it1);
 		} else if (n1.state == 1 && n2.state == 2) {
 			copyWithPreOrderTraversal(it, it2);
-		} else if (n1.state == 2 && n2.state == 2) {
-			it.addValue(Node.valueOf(2));
 		} else if (n1.state == 1 && n2.state == 1) {
 			it.addValue(Node.valueOf(1));
-		} else {
-			it.addValue(Node.valueOf(0));
 		}
+
 		// Ensuite on continue le parcours
 		if (n1.state == 2 && n2.state == 2) {
+			it.addValue(Node.valueOf(2));
+
 			it.goLeft();
 			it1.goLeft();
 			it2.goLeft();
@@ -346,6 +361,7 @@ public class Image extends AbstractImage {
 			it.goUp();
 			it1.goUp();
 			it2.goUp();
+
 			// On gère les cas (2,1,1) et (2,0,0)
 			if (leftState == rightState && leftState != 2) {
 				// On retire les deux fils
@@ -354,7 +370,7 @@ public class Image extends AbstractImage {
 				it.addValue(Node.valueOf(leftState));
 			}
 		}
-
+		// Retourne le résultat de intersection
 		return it.getValue().state;
 	}
 
@@ -368,7 +384,6 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public void union(AbstractImage image1, AbstractImage image2) {
-		// Opérationnel
 		if (this == image1 && this == image2) {
 			return; // Rien à faire
 		}
@@ -389,23 +404,24 @@ public class Image extends AbstractImage {
 	 * @param it2 itérateur de l’image 2
 	 */
 	private int unionAux(Iterator<Node> it, Iterator<Node> it1, Iterator<Node> it2) {
-		// Opérationnel
+		// On fait d'abord l'union des racines
 		Node n1 = it1.getValue();
 		Node n2 = it2.getValue();
-		// On traite d'abord la racine
+
 		if (n1.state == 1 || n2.state == 1) {
 			it.addValue(Node.valueOf(1));
 		} else if (n1.state == 2 && n2.state == 0) {
 			copyWithPreOrderTraversal(it, it1);
 		} else if (n1.state == 0 && n2.state == 2) {
 			copyWithPreOrderTraversal(it, it2);
-		} else if (n1.state == 2 && n2.state == 2) {
-			it.addValue(Node.valueOf(2));
-		} else {
+		} else if (n1.state == 0 && n2.state == 0) {
 			it.addValue(Node.valueOf(0));
 		}
+
 		// Ensuite on continue le parcours
 		if (n1.state == 2 && n2.state == 2) {
+			it.addValue(Node.valueOf(2));
+
 			it.goLeft();
 			it1.goLeft();
 			it2.goLeft();
@@ -429,7 +445,7 @@ public class Image extends AbstractImage {
 				it.addValue(Node.valueOf(leftState));
 			}
 		}
-
+		// Retourne le résultat de l'union
 		return it.getValue().state;
 	}
 
@@ -441,7 +457,6 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public boolean testDiagonal() {
-		// Opérationnel
 		Iterator<Node> it = this.iterator();
 		int x = testDiagonalAux(0, 255, 0, it);
 		return x == 256;
@@ -457,7 +472,6 @@ public class Image extends AbstractImage {
 	 * @return la coordonnée du dernier pixel de la diagonale qui a été testé
 	 */
 	private int testDiagonalAux(int debut, int fin, int x, Iterator<Node> it) {
-		// Opérationnel
 		Node n = it.getValue();
 
 		if (n.state == 1 && x <= 255) {
@@ -502,7 +516,6 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public boolean isPixelOn(int x, int y) {
-		// Opérationnel
 		int debutX = 0, finX = 255;
 		int middleX = (debutX + finX) / 2;
 		int debutY = 0, finY = 255;
@@ -547,7 +560,6 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public boolean sameLeaf(int x1, int y1, int x2, int y2) {
-		// Opérationnel
 		if (x1 == x2 && y1 == y2) {
 			return true;
 		}
@@ -558,8 +570,9 @@ public class Image extends AbstractImage {
 		int middleY = (debutY + finY) / 2;
 
 		Iterator<Node> it = this.iterator();
+		boolean same = true;
 
-		while (it.getValue().state == 2) {
+		while (it.getValue().state == 2 && same) {
 			// Découpage sur y
 			if (y1 <= middleY && y2 <= middleY) {
 				it.goLeft();
@@ -568,12 +581,12 @@ public class Image extends AbstractImage {
 				it.goRight();
 				debutY = middleY + 1;
 			} else {
-				return false;
+				same = false;
 			}
 			middleY = (debutY + finY) / 2;
 
 			// Découpage sur x
-			if (it.getValue().state == 2) {
+			if (it.getValue().state == 2 && same) {
 				if (x1 <= middleX && x2 <= middleX) {
 					it.goLeft();
 					finX = middleX;
@@ -581,12 +594,12 @@ public class Image extends AbstractImage {
 					it.goRight();
 					debutX = middleX + 1;
 				} else {
-					return false;
+					same = false;
 				}
 				middleX = (debutX + finX) / 2;
 			}
 		}
-		return true;
+		return same;
 	}
 
 	/**
@@ -597,7 +610,6 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public boolean isIncludedIn(AbstractImage image2) {
-		// Opérationnel
 		if (this == image2) {
 			return true;
 		}
@@ -605,30 +617,28 @@ public class Image extends AbstractImage {
 		Iterator<Node> it1 = this.iterator();
 		Iterator<Node> it2 = image2.iterator();
 
-		return isIncludedInAux(it1, it2);
+		return isIncludedInAux(it1, it2, true);
 	}
 
-	private boolean isIncludedInAux(Iterator<Node> it1, Iterator<Node> it2) {
-		// Opérationnel
+	private boolean isIncludedInAux(Iterator<Node> it1, Iterator<Node> it2, boolean inclusion) {
 		Node n1 = it1.getValue();
 		Node n2 = it2.getValue();
-		boolean inclusion = true;
-		// Si tout est allumé dans this alors que image2 est partiellement ou
-		// totalement éteint, on renvoi false
+		// Cas d'arrêt 1: this est totallement allumé et image2 ne l'est pas
+		// Cas d'arrêt 2: this est partiellement allumé et image2 est totallement éteint
 		if ((n1.state == 1 && n2.state != 1) || (n1.state == 2 && n2.state == 0)) {
-			inclusion = false;
+			return false;
 		}
 
-		if (n1.state == 2 && n2.state == 2) {
+		if (n1.state == 2 && n2.state == 2 && inclusion) {
 			it1.goLeft();
 			it2.goLeft();
-			inclusion &= isIncludedInAux(it1, it2);
+			inclusion = isIncludedInAux(it1, it2, inclusion);
 			it1.goUp();
 			it2.goUp();
 
 			it1.goRight();
 			it2.goRight();
-			inclusion &= isIncludedInAux(it1, it2);
+			inclusion = isIncludedInAux(it1, it2, inclusion);
 			it1.goUp();
 			it2.goUp();
 		}
