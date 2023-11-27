@@ -457,9 +457,50 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public boolean testDiagonal() {
+		// Note: on a pu faire une version itérative et une version récursive
 		Iterator<Node> it = this.iterator();
-		int x = testDiagonalAux(0, 255, 0, it);
-		return x == 256;
+
+		int x = 0;
+		int debut = 0, fin = 255;
+		int middle = (debut + fin) / 2;
+		boolean isDiagonal = true;
+
+		while (x <= 255 && isDiagonal) {
+			if (it.getValue().state == 0) {
+				isDiagonal = false;
+			} else if (it.getValue().state == 1) {
+				// Si le pixel de coords (x,x) est allumé,
+				// on test le suivant (x+1,x+1) sur la diagonale
+				x++;
+				debut = 0;
+				fin = 255;
+				middle = (debut + fin) / 2;
+				it.goRoot();
+			} else {
+				// Si on a pas encore trouvé le noeud correspondant aux coords (x,x),
+				// on continue le parcours
+				if (x <= middle) {
+					it.goLeft();
+					fin = middle;
+				} else {
+					it.goRight();
+					debut = middle + 1;
+				}
+
+				if (it.getValue().state == 2) {
+					if (x <= middle) {
+						it.goLeft();
+						fin = middle;
+					} else {
+						it.goRight();
+						debut = middle + 1;
+					}
+				}
+				middle = (debut + fin) / 2;
+			}
+		}
+
+		return isDiagonal;
 	}
 
 	/**
@@ -475,7 +516,7 @@ public class Image extends AbstractImage {
 		Node n = it.getValue();
 
 		if (n.state == 1 && x <= 255) {
-			// Si pixel de coords (x,x) est allumé,
+			// Si le pixel de coords (x,x) est allumé,
 			// on test le suivant (x+1,x+1) sur la diagonale
 			it.goRoot();
 			x = testDiagonalAux(0, 255, x + 1, it);
