@@ -273,6 +273,9 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public void zoomOut(AbstractImage image2) {
+		// à refaire
+		// Indice: Lorsqu'on dézoom une image, elle perd en qualité donc un pixel de
+		// taille t passe à une taille t/4
 		Iterator<Node> it1 = this.iterator();
 		Iterator<Node> it2 = image2.iterator();
 		int compteur = 0;
@@ -457,50 +460,8 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public boolean testDiagonal() {
-		// Note: on a pu faire une version itérative et une version récursive
 		Iterator<Node> it = this.iterator();
-
-		int x = 0;
-		int debut = 0, fin = 255;
-		int middle = (debut + fin) / 2;
-		boolean isDiagonal = true;
-
-		while (x <= 255 && isDiagonal) {
-			if (it.getValue().state == 0) {
-				isDiagonal = false;
-			} else if (it.getValue().state == 1) {
-				// Si le pixel de coords (x,x) est allumé,
-				// on test le suivant (x+1,x+1) sur la diagonale
-				x++;
-				debut = 0;
-				fin = 255;
-				middle = (debut + fin) / 2;
-				it.goRoot();
-			} else {
-				// Si on a pas encore trouvé le noeud correspondant aux coords (x,x),
-				// on continue le parcours
-				if (x <= middle) {
-					it.goLeft();
-					fin = middle;
-				} else {
-					it.goRight();
-					debut = middle + 1;
-				}
-
-				if (it.getValue().state == 2) {
-					if (x <= middle) {
-						it.goLeft();
-						fin = middle;
-					} else {
-						it.goRight();
-						debut = middle + 1;
-					}
-				}
-				middle = (debut + fin) / 2;
-			}
-		}
-
-		return isDiagonal;
+		return testDiagonalAux(0, 255, 0, true, it);
 	}
 
 	/**
@@ -512,41 +473,10 @@ public class Image extends AbstractImage {
 	 * @param it    itérateur de this
 	 * @return la coordonnée du dernier pixel de la diagonale qui a été testé
 	 */
-	private int testDiagonalAux(int debut, int fin, int x, Iterator<Node> it) {
+	private boolean testDiagonalAux(int debut, int fin, int x, boolean isDiagonal, Iterator<Node> it) {
 		Node n = it.getValue();
-
-		if (n.state == 1 && x <= 255) {
-			// Si le pixel de coords (x,x) est allumé,
-			// on test le suivant (x+1,x+1) sur la diagonale
-			it.goRoot();
-			x = testDiagonalAux(0, 255, x + 1, it);
-
-		} else if (n.state == 2) {
-			// Si on a pas encore trouvé le noeud correspondant aux coords (x,x),
-			// on continue le parcours
-			int middle = (debut + fin) / 2;
-			if (x <= middle) {
-				it.goLeft();
-				fin = middle;
-			} else {
-				it.goRight();
-				debut = middle + 1;
-			}
-
-			n = it.getValue();
-			if (n.state == 2) {
-				if (x <= middle) {
-					it.goLeft();
-					fin = middle;
-				} else {
-					it.goRight();
-					debut = middle + 1;
-				}
-			}
-			x = testDiagonalAux(debut, fin, x, it);
-		}
-
-		return x;
+		// à refaire
+		return true;
 	}
 
 	/**
