@@ -297,8 +297,50 @@ public class Image extends AbstractImage {
 				it1.goLeft();
 				compteur++;
 			}
-			copyWithPreOrderTraversal(it1, it2);
+			zoomOutAux(it1, it2, 2, 0, 0);
 		}
+	}
+
+	private void zoomOutAux(Iterator<Node> it1, Iterator<Node> it2, int profondeur, int onCounter, int offCounter) {
+		// On traite d'abord la racine
+		Node n2 = it2.getValue();
+		it1.addValue(Node.valueOf(n2.state));
+
+		System.out.println("onCounter -> " + onCounter);
+		System.out.println("offCounter -> " + offCounter);
+		System.out.println("");
+
+		if (n2.state == 0) {
+			offCounter += 1;
+		} else if (n2.state == 1) {
+			onCounter += 1;
+		}
+
+		// Seuls les noeuds de state = 2 ont des fils
+		if (n2.state == 2) {
+			it1.goLeft();
+			it2.goLeft();
+
+			zoomOutAux(it1, it2, profondeur + 1, onCounter, offCounter);
+
+			it1.goUp();
+			it2.goUp();
+
+			it1.goRight();
+			it2.goRight();
+
+			zoomOutAux(it1, it2, profondeur + 1, onCounter, offCounter);
+
+			it1.goUp();
+			it2.goUp();
+		}
+
+		if (profondeur == 16) {
+			it1.clear();
+			int leafState = onCounter > offCounter ? 1 : 0;
+			it1.addValue(Node.valueOf(leafState));
+		}
+
 	}
 
 	/**
