@@ -273,9 +273,6 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public void zoomOut(AbstractImage image2) {
-		// à refaire
-		// Indice: Lorsqu'on dézoom une image, elle perd en qualité donc un pixel de
-		// taille t passe à une taille t/4
 		Iterator<Node> it1 = this.iterator();
 		Iterator<Node> it2 = image2.iterator();
 		int compteur = 0;
@@ -503,22 +500,55 @@ public class Image extends AbstractImage {
 	@Override
 	public boolean testDiagonal() {
 		Iterator<Node> it = this.iterator();
-		return testDiagonalAux(0, 255, 0, true, it);
+		return testDiagonalAux(it, true);
 	}
 
 	/**
 	 * Fonction auxiliaire utile pour réaliser testDiagonal
 	 *
-	 * @param debut début de l'intervalle dans lequel il faut circuler
-	 * @param fin   fin de l'intervalle dans lequel il faut circuler
-	 * @param x     coordonnée du point de la diagonale à vérifier
-	 * @param it    itérateur de this
-	 * @return la coordonnée du dernier pixel de la diagonale qui a été testé
+	 * @param it         itérateur de this
+	 * @param isDiagonal doit prendre true lorsque la diagonale est allumée, false
+	 *                   sinon
+	 * @return true si la portion de diagonale actuellement visitée est allumée,
+	 *         false sinon
 	 */
-	private boolean testDiagonalAux(int debut, int fin, int x, boolean isDiagonal, Iterator<Node> it) {
+	private boolean testDiagonalAux(Iterator<Node> it, boolean isDiagonal) {
 		Node n = it.getValue();
-		// à refaire
-		return true;
+		boolean twoStepUnder = false;
+
+		if (n.state != 2) {
+			return n.state == 1 && isDiagonal;
+		} else if (isDiagonal) {
+			it.goLeft();
+			if (it.getValue().state == 2) {
+				it.goLeft();
+				twoStepUnder = true;
+			}
+
+			isDiagonal = testDiagonalAux(it, isDiagonal);
+
+			it.goUp();
+			if (twoStepUnder) {
+				it.goUp();
+				twoStepUnder = false;
+			}
+
+			it.goRight();
+			if (it.getValue().state == 2) {
+				it.goRight();
+				twoStepUnder = true;
+			}
+
+			isDiagonal = testDiagonalAux(it, isDiagonal);
+
+			it.goUp();
+			if (twoStepUnder) {
+				it.goUp();
+				twoStepUnder = false;
+			}
+		}
+
+		return isDiagonal;
 	}
 
 	/**
