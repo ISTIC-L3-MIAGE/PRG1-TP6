@@ -37,7 +37,7 @@ public class Image extends AbstractImage {
 	public void copyWithPreOrderTraversal(Iterator<Node> it1, Iterator<Node> it2) {
 		// On traite d'abord la racine
 		Node n2 = it2.getValue();
-		it1.addValue(Node.valueOf(n2.state));
+		it1.addValue(n2);
 		// Seuls les noeuds de state = 2 ont des fils
 		if (n2.state == 2) {
 			it1.goLeft();
@@ -96,7 +96,7 @@ public class Image extends AbstractImage {
 	 */
 	private void rotate180Aux(Iterator<Node> it1, Iterator<Node> it2) {
 		Node n2 = it2.getValue();
-		it1.addValue(Node.valueOf(n2.state));
+		it1.addValue(n2);
 
 		if (n2.state == 2) {
 			it2.goLeft();
@@ -186,7 +186,7 @@ public class Image extends AbstractImage {
 	 */
 	private void mirrorAux(Iterator<Node> it1, Iterator<Node> it2, boolean follow) {
 		Node n2 = it2.getValue();
-		it1.addValue(Node.valueOf(n2.state));
+		it1.addValue(n2);
 
 		if (n2.state == 2) {
 			it2.goLeft();
@@ -247,25 +247,24 @@ public class Image extends AbstractImage {
 
 		Iterator<Node> it1 = this.iterator();
 		Iterator<Node> it2 = image2.iterator();
-		int compteur = 0;
-		int niveau = 0;
-		int profondeur = image2.height();
+		int counter = 0;
+		int level = 0;
 
 		it1.clear();
 		if (it2.getValue().state == 0) {
 			it1.addValue(Node.valueOf(0));
 		} else {
-			while (compteur < 2) {
+			while (counter < 2) {
 				it1.addValue(Node.valueOf(2));
 				it1.goRight();
 				it1.addValue(Node.valueOf(0));
 				it1.goUp();
 				it1.goLeft();
-				compteur++;
+				counter++;
 			}
 		}
 
-		zoomOutAux(it1, it2, niveau, profondeur);
+		zoomOutAux(it1, it2, level);
 
 		if (it1.getValue().state == 0) {
 			it1.goRoot();
@@ -274,18 +273,17 @@ public class Image extends AbstractImage {
 		}
 	}
 
-	private void zoomOutAux(Iterator<Node> it1, Iterator<Node> it2, int niveau, int profondeur) {
+	private void zoomOutAux(Iterator<Node> it1, Iterator<Node> it2, int level) {
 		Node n2 = it2.getValue();
-		niveau++;
+		it1.addValue(n2);
+		level++;
 
-		if (niveau < profondeur - 1) {
-			it1.addValue(n2);
-
-			if (n2.state == 2) {
+		if (n2.state == 2) {
+			if (level < 15) {
 				it1.goLeft();
 				it2.goLeft();
 
-				zoomOutAux(it1, it2, niveau, profondeur);
+				zoomOutAux(it1, it2, level);
 				int leftState = it1.getValue().state;
 
 				it1.goUp();
@@ -294,7 +292,7 @@ public class Image extends AbstractImage {
 				it1.goRight();
 				it2.goRight();
 
-				zoomOutAux(it1, it2, niveau, profondeur);
+				zoomOutAux(it1, it2, level);
 				int rightState = it1.getValue().state;
 
 				it1.goUp();
@@ -305,9 +303,7 @@ public class Image extends AbstractImage {
 					it1.clear();
 					it1.addValue(Node.valueOf(leftState));
 				}
-			}
-		} else {
-			if (n2.state == 2) {
+			} else { // Correction des feuilles de l'arbre
 				it2.goLeft();
 				int leftState = it2.getValue().state;
 				it2.goUp();
@@ -316,36 +312,16 @@ public class Image extends AbstractImage {
 				int rightState = it2.getValue().state;
 				it2.goUp();
 
-				if (leftState == 2 && rightState == 2) {
+				it1.clear();
+				if (leftState == 1 || rightState == 1) {
 					it1.addValue(Node.valueOf(1));
-				} else if (leftState == 1 || rightState == 1) {
+				} else if (leftState == 2 && rightState == 2) {
 					it1.addValue(Node.valueOf(1));
 				} else {
 					it1.addValue(Node.valueOf(0));
 				}
-			} else if (n2.state != 2) {
-				it1.addValue(Node.valueOf(n2.state));
 			}
 		}
-	}
-
-	public int height() {
-		return heightAux(this.iterator(), 0);
-	}
-
-	private int heightAux(Iterator<Node> it, int hauteur) {
-		if (it.getValue().state == 2) {
-			it.goLeft();
-			int leftHeight = heightAux(it, hauteur + 1);
-			it.goUp();
-
-			it.goRight();
-			int rightHeight = heightAux(it, hauteur + 1);
-			it.goUp();
-
-			return leftHeight > rightHeight ? leftHeight : rightHeight;
-		}
-		return hauteur;
 	}
 
 	/**
@@ -420,9 +396,7 @@ public class Image extends AbstractImage {
 
 			// On gère les cas (2,1,1) et (2,0,0)
 			if (leftState == rightState && leftState != 2) {
-				// On retire les deux fils
 				it.clear();
-				// On remplace le père par 1 ou 0
 				it.addValue(Node.valueOf(leftState));
 			}
 		}
