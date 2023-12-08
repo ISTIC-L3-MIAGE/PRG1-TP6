@@ -273,6 +273,13 @@ public class Image extends AbstractImage {
 		}
 	}
 
+	/**
+	 * Fonction auxiliaire utile pour réaliser zoomOut
+	 *
+	 * @param it1   itérateur de this
+	 * @param it2   itérateur de l’image 2
+	 * @param level le niveau courant dans l'arbre de l’image 2
+	 */
 	private void zoomOutAux(Iterator<Node> it1, Iterator<Node> it2, int level) {
 		Node n2 = it2.getValue();
 		it1.addValue(n2);
@@ -474,9 +481,7 @@ public class Image extends AbstractImage {
 
 			// On gère les cas (2,1,1) et (2,0,0)
 			if (leftState == rightState && leftState != 2) {
-				// On retire les deux fils
 				it.clear();
-				// On remplace le père par 1 ou 0
 				it.addValue(Node.valueOf(leftState));
 			}
 		}
@@ -656,6 +661,14 @@ public class Image extends AbstractImage {
 		return isIncludedInAux(it1, it2, true);
 	}
 
+	/**
+	 * Fonction auxiliaire utile pour réaliser isIncludedIn
+	 *
+	 * @param it1       itérateur de this
+	 * @param it2       itérateur de l’image 2
+	 * @param inclusion doit prendre true si this est inclus dans image 2, false
+	 *                  sinon
+	 */
 	private boolean isIncludedInAux(Iterator<Node> it1, Iterator<Node> it2, boolean inclusion) {
 		Node n1 = it1.getValue();
 		Node n2 = it2.getValue();
