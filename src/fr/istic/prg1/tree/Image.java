@@ -12,7 +12,7 @@ package fr.istic.prg1.tree;
 
 import java.util.Scanner;
 
-//import fr.istic.prg1.tree_util.AbstractImage;
+import fr.istic.prg1.tree_util.AbstractImage;
 import fr.istic.prg1.tree_util.Iterator;
 import fr.istic.prg1.tree_util.Node;
 
@@ -260,11 +260,11 @@ public class Image extends AbstractImage {
 				it1.goLeft();
 				compteur++;
 			}
-			zoomOutAux(it1, it2, 2, 0, 0);
+			zoomOutAux(it1, it2, 2);
 		}
 	}
 
-	private void zoomOutAux(Iterator<Node> it1, Iterator<Node> it2, int profondeur, int onCounter, int offCounter) {
+	private void zoomOutAux(Iterator<Node> it1, Iterator<Node> it2, int profondeur) {
 		// On traite d'abord la racine
 		Node n2 = it2.getValue();
 		it1.addValue(Node.valueOf(n2.state));
@@ -274,7 +274,8 @@ public class Image extends AbstractImage {
 			it1.goLeft();
 			it2.goLeft();
 
-			zoomOutAux(it1, it2, profondeur + 1, onCounter, offCounter);
+			zoomOutAux(it1, it2, profondeur + 1);
+			int leftState = it1.getValue().state;
 
 			it1.goUp();
 			it2.goUp();
@@ -282,19 +283,47 @@ public class Image extends AbstractImage {
 			it1.goRight();
 			it2.goRight();
 
-			zoomOutAux(it1, it2, profondeur + 1, onCounter, offCounter);
+			zoomOutAux(it1, it2, profondeur + 1);
+			int rightState = it1.getValue().state;
 
 			it1.goUp();
 			it2.goUp();
 
-			if (profondeur == 16) {
+			if (profondeur < 16) {
+				if (leftState == rightState && leftState != 2) {
+					it1.clear();
+					it1.addValue(Node.valueOf(leftState));
+				}
+			} else {
 				it1.clear();
-				// int leafState = leftState > rightState ? leftState : rightState;
-				it1.addValue(Node.valueOf(0));
-				// System.out.println("Profondeur 16 state -> " + leafState);
-
+				if (leftState == 1 || rightState == 1) {
+					it1.addValue(Node.valueOf(1));
+				} else if (leftState == 2 && rightState == 2) {
+					it1.addValue(Node.valueOf(1));
+				} else {
+					it1.addValue(Node.valueOf(0));
+				}
 			}
 		}
+	}
+
+	public int height() {
+		return heightAux(this.iterator(), 0);
+	}
+
+	private int heightAux(Iterator<Node> it, int hauteur) {
+		if (it.getValue().state == 2) {
+			it.goLeft();
+			int leftHeight = heightAux(it, hauteur + 1);
+			it.goUp();
+
+			it.goRight();
+			int rightHeight = heightAux(it, hauteur + 1);
+			it.goUp();
+			return leftHeight > rightHeight ? leftHeight : rightHeight;
+		}
+		return hauteur;
+
 	}
 
 	/**
@@ -326,7 +355,7 @@ public class Image extends AbstractImage {
 	 * @param it1 itérateur de l’image 1
 	 * @param it2 itérateur de l’image 2
 	 */
-	private int intersectionAux(Iterator<Node> it, Iterator<Node> it1, Iterator<Node> it2) {
+	private void intersectionAux(Iterator<Node> it, Iterator<Node> it1, Iterator<Node> it2) {
 		// On fait d'abord l'intersection des racines
 		Node n1 = it1.getValue();
 		Node n2 = it2.getValue();
@@ -348,7 +377,10 @@ public class Image extends AbstractImage {
 			it.goLeft();
 			it1.goLeft();
 			it2.goLeft();
-			int leftState = intersectionAux(it, it1, it2);
+
+			intersectionAux(it, it1, it2);
+			int leftState = it.getValue().state;
+
 			it.goUp();
 			it1.goUp();
 			it2.goUp();
@@ -356,7 +388,10 @@ public class Image extends AbstractImage {
 			it.goRight();
 			it1.goRight();
 			it2.goRight();
-			int rightState = intersectionAux(it, it1, it2);
+
+			intersectionAux(it, it1, it2);
+			int rightState = it.getValue().state;
+
 			it.goUp();
 			it1.goUp();
 			it2.goUp();
@@ -369,8 +404,6 @@ public class Image extends AbstractImage {
 				it.addValue(Node.valueOf(leftState));
 			}
 		}
-		// Retourne le résultat de intersection
-		return it.getValue().state;
 	}
 
 	/**
@@ -402,7 +435,7 @@ public class Image extends AbstractImage {
 	 * @param it1 itérateur de l’image 1
 	 * @param it2 itérateur de l’image 2
 	 */
-	private int unionAux(Iterator<Node> it, Iterator<Node> it1, Iterator<Node> it2) {
+	private void unionAux(Iterator<Node> it, Iterator<Node> it1, Iterator<Node> it2) {
 		// On fait d'abord l'union des racines
 		Node n1 = it1.getValue();
 		Node n2 = it2.getValue();
@@ -424,7 +457,10 @@ public class Image extends AbstractImage {
 			it.goLeft();
 			it1.goLeft();
 			it2.goLeft();
-			int leftState = unionAux(it, it1, it2);
+
+			unionAux(it, it1, it2);
+			int leftState = it.getValue().state;
+
 			it.goUp();
 			it1.goUp();
 			it2.goUp();
@@ -432,10 +468,14 @@ public class Image extends AbstractImage {
 			it.goRight();
 			it1.goRight();
 			it2.goRight();
-			int rightState = unionAux(it, it1, it2);
+
+			unionAux(it, it1, it2);
+			int rightState = it.getValue().state;
+
 			it.goUp();
 			it1.goUp();
 			it2.goUp();
+
 			// On gère les cas (2,1,1) et (2,0,0)
 			if (leftState == rightState && leftState != 2) {
 				// On retire les deux fils
@@ -444,8 +484,6 @@ public class Image extends AbstractImage {
 				it.addValue(Node.valueOf(leftState));
 			}
 		}
-		// Retourne le résultat de l'union
-		return it.getValue().state;
 	}
 
 	/**
@@ -473,6 +511,8 @@ public class Image extends AbstractImage {
 		Node n = it.getValue();
 		boolean twoStepUnder = false;
 
+		// Les pixels sur la diagonale sont placé à chaque deux fois à gauche et deux
+		// fois à droite
 		if (n.state != 2) {
 			return n.state == 1 && isDiagonal;
 		} else if (isDiagonal) {
@@ -524,7 +564,7 @@ public class Image extends AbstractImage {
 		Iterator<Node> it = this.iterator();
 
 		while (it.getValue().state == 2) {
-			// Découpage sur y
+			// Découpage horizontal
 			if (y <= middleY) {
 				it.goLeft();
 				finY = middleY;
@@ -534,7 +574,7 @@ public class Image extends AbstractImage {
 			}
 			middleY = (debutY + finY) / 2;
 
-			// Découpage sur x
+			// Découpage sur vertical
 			if (it.getValue().state == 2) {
 				if (x <= middleX) {
 					it.goLeft();
@@ -573,7 +613,7 @@ public class Image extends AbstractImage {
 		boolean same = true;
 
 		while (it.getValue().state == 2 && same) {
-			// Découpage sur y
+			// Découpage horizontal
 			if (y1 <= middleY && y2 <= middleY) {
 				it.goLeft();
 				finY = middleY;
@@ -585,7 +625,7 @@ public class Image extends AbstractImage {
 			}
 			middleY = (debutY + finY) / 2;
 
-			// Découpage sur x
+			// Découpage vertical
 			if (it.getValue().state == 2 && same) {
 				if (x1 <= middleX && x2 <= middleX) {
 					it.goLeft();
@@ -632,13 +672,17 @@ public class Image extends AbstractImage {
 		if (n1.state == 2 && n2.state == 2 && inclusion) {
 			it1.goLeft();
 			it2.goLeft();
+
 			inclusion = isIncludedInAux(it1, it2, inclusion);
+
 			it1.goUp();
 			it2.goUp();
 
 			it1.goRight();
 			it2.goRight();
+
 			inclusion = isIncludedInAux(it1, it2, inclusion);
+
 			it1.goUp();
 			it2.goUp();
 		}

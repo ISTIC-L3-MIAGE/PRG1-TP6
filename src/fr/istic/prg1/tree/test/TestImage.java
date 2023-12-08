@@ -409,6 +409,12 @@ public class TestImage {
 		Image image3 = readFile(DIR + "cartoonout.arb");
 		Image image4 = readFile(CARTOON);
 		image2.zoomOut(image1);
+
+		System.out.println("Hauteur I1 -> " + image1.height());
+		System.out.println("Hauteur I2 -> " + image2.height());
+		System.out.println("Hauteur I3 -> " + image3.height());
+		System.out.println("Hauteur I4 -> " + image4.height());
+
 		assertTrue("zoomOut cartoon : arbre conforme ?", testCorrectness(image2));
 		assertTrue("zoomOut cartoon test 1", compareImages(image2, image3));
 		assertTrue("zoomOut cartoon test 2", compareImages(image1, image4));
