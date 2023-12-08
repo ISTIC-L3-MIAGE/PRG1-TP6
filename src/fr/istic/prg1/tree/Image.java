@@ -12,7 +12,7 @@ package fr.istic.prg1.tree;
 
 import java.util.Scanner;
 
-import fr.istic.prg1.tree_util.AbstractImage;
+//import fr.istic.prg1.tree_util.AbstractImage;
 import fr.istic.prg1.tree_util.Iterator;
 import fr.istic.prg1.tree_util.Node;
 
@@ -244,9 +244,12 @@ public class Image extends AbstractImage {
 	 */
 	@Override
 	public void zoomOut(AbstractImage image2) {
+
 		Iterator<Node> it1 = this.iterator();
 		Iterator<Node> it2 = image2.iterator();
 		int compteur = 0;
+		int niveau = 0;
+		int profondeur = image2.height();
 
 		it1.clear();
 		if (it2.getValue().state == 0) {
@@ -260,49 +263,68 @@ public class Image extends AbstractImage {
 				it1.goLeft();
 				compteur++;
 			}
-			zoomOutAux(it1, it2, 2);
+		}
+
+		zoomOutAux(it1, it2, niveau, profondeur);
+
+		if (it1.getValue().state == 0) {
+			it1.goRoot();
+			it1.clear();
+			it1.addValue(Node.valueOf(0));
 		}
 	}
 
-	private void zoomOutAux(Iterator<Node> it1, Iterator<Node> it2, int profondeur) {
-		// On traite d'abord la racine
+	private void zoomOutAux(Iterator<Node> it1, Iterator<Node> it2, int niveau, int profondeur) {
 		Node n2 = it2.getValue();
-		it1.addValue(Node.valueOf(n2.state));
+		niveau++;
 
-		// Seuls les noeuds de state = 2 ont des fils
-		if (n2.state == 2) {
-			it1.goLeft();
-			it2.goLeft();
+		if (niveau < profondeur - 1) {
+			it1.addValue(n2);
 
-			zoomOutAux(it1, it2, profondeur + 1);
-			int leftState = it1.getValue().state;
+			if (n2.state == 2) {
+				it1.goLeft();
+				it2.goLeft();
 
-			it1.goUp();
-			it2.goUp();
+				zoomOutAux(it1, it2, niveau, profondeur);
+				int leftState = it1.getValue().state;
 
-			it1.goRight();
-			it2.goRight();
+				it1.goUp();
+				it2.goUp();
 
-			zoomOutAux(it1, it2, profondeur + 1);
-			int rightState = it1.getValue().state;
+				it1.goRight();
+				it2.goRight();
 
-			it1.goUp();
-			it2.goUp();
+				zoomOutAux(it1, it2, niveau, profondeur);
+				int rightState = it1.getValue().state;
 
-			if (profondeur < 16) {
+				it1.goUp();
+				it2.goUp();
+
+				// On gère les cas (2,1,1) et (2,0,0)
 				if (leftState == rightState && leftState != 2) {
 					it1.clear();
 					it1.addValue(Node.valueOf(leftState));
 				}
-			} else {
-				it1.clear();
-				if (leftState == 1 || rightState == 1) {
+			}
+		} else {
+			if (n2.state == 2) {
+				it2.goLeft();
+				int leftState = it2.getValue().state;
+				it2.goUp();
+
+				it2.goRight();
+				int rightState = it2.getValue().state;
+				it2.goUp();
+
+				if (leftState == 2 && rightState == 2) {
 					it1.addValue(Node.valueOf(1));
-				} else if (leftState == 2 && rightState == 2) {
+				} else if (leftState == 1 || rightState == 1) {
 					it1.addValue(Node.valueOf(1));
 				} else {
 					it1.addValue(Node.valueOf(0));
 				}
+			} else if (n2.state != 2) {
+				it1.addValue(Node.valueOf(n2.state));
 			}
 		}
 	}
@@ -320,10 +342,10 @@ public class Image extends AbstractImage {
 			it.goRight();
 			int rightHeight = heightAux(it, hauteur + 1);
 			it.goUp();
+
 			return leftHeight > rightHeight ? leftHeight : rightHeight;
 		}
 		return hauteur;
-
 	}
 
 	/**
