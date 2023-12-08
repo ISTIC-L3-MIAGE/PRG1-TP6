@@ -1,68 +1,149 @@
 package fr.istic.prg1.tree;
 
-public abstract class BinaryTree {
-	enum NodeType {SENTINEL, LEAF, SIMPLE_LEFT, SIMPLE_RIGHT, DOUBLE};
-	static final int NODE_EMPTY_VALUE = -1;
-	// Classe interne représentant un noeud de l'arbre
-	private class Node {
-		
-		int value;
-		Node father;
-		Node left;
-		Node right;
-		
-		Node() {
-			this.value = NODE_EMPTY_VALUE;
-			this.father = null;
-			this.left = null;
-			this.right = null;
+import java.util.ArrayDeque;
+import java.util.Deque;
+
+import fr.istic.prg1.tree_util.Iterator;
+import fr.istic.prg1.tree_util.NodeType;
+
+/**
+ * @author Antonella Atterey <antonella.atterey@etudiant.univ-rennes1.fr>
+ * @author Ezan Tahi <ezan.tahi@etudiant.univ-rennes1.fr>
+ * @class L3 MIAGE 2023/2024
+ * @param <T> type formel d'objet pour la classe
+ *
+ *            Les arbres binaires sont construits par chaînage par références
+ *            pour les fils et une pile de pères.
+ */
+public class BinaryTree<T> {
+
+	/**
+	 * Type représentant les noeuds.
+	 */
+	private class Element {
+		public T value;
+		public Element left, right;
+
+		public Element() {
+			value = null;
+			left = null;
+			right = null;
 		}
-		
-		Node(int value, Node father, Node left, Node right) {
-			this.value = value;
-			this.father = father;
-			this.left = left;
-			this.right = right;
+
+		public boolean isEmpty() {
+			return left == null && right == null;
 		}
 	}
-	
-	// Classe interne représentant l'itérateur de l'arbre
-	public class Iterator {
-		
-		Node current;
-		
-		Iterator() {
-			this.current = root;
+
+	private Element root;
+
+	public BinaryTree() {
+		root = new Element();
+	}
+
+	/**
+	 * @return Un nouvel iterateur sur l'arbre this. Le noeud courant de l'itérateur
+	 *         est positionné sur la racine de l'arbre.
+	 */
+	public TreeIterator iterator() {
+		return new TreeIterator();
+	}
+
+	/**
+	 * @return true si l'arbre this est vide, false sinon
+	 */
+	public boolean isEmpty() {
+		return root.isEmpty();
+	}
+
+	/**
+	 * Classe représentant les itérateurs sur les arbres binaires.
+	 */
+	public class TreeIterator implements Iterator<T> {
+		private Element currentNode;
+		private Deque<Element> stack;
+
+		private TreeIterator() {
+			stack = new ArrayDeque<>();
+			currentNode = root;
 		}
-		
-		public boolean isEmpty() {
-			return current.left == null && current.right == null;
-		}
-		
-		public void goRoot() {
-			current = root;
-		}
-		
-		public void goUp() {
-			assert current == root: "La racine n'a pas de père";
-			current = current.father;
-		}
-		
+
+		/**
+		 * L'itérateur se positionnne sur le fils gauche du noeud courant.
+		 * 
+		 * @pre Le noeud courant n'est pas un butoir.
+		 */
+		@Override
 		public void goLeft() {
-			assert !this.isEmpty(): "Le butoir n'a pas de fils gauche";
-			current = current.left;
+			try {
+				assert !this.isEmpty() : "le butoir n'a pas de fils";
+				stack.push(currentNode);
+				currentNode = currentNode.left;
+			} catch (AssertionError e) {
+				e.printStackTrace();
+				System.exit(0);
+			}
 		}
-		
+
+		/**
+		 * L'itÃ©rateur se positionnne sur le fils droit du noeud courant.
+		 * 
+		 * @pre Le noeud courant nâ€™est pas un butoir.
+		 */
+		@Override
 		public void goRight() {
-			assert !this.isEmpty(): "Le butoir n'a pas de fils droit";
-			current = current.right;
+			try {
+				assert !this.isEmpty() : "le butoir n'a pas de fils";
+				stack.push(currentNode);
+				currentNode = currentNode.right;
+			} catch (AssertionError e) {
+				e.printStackTrace();
+				System.exit(0);
+			}
 		}
-		
+
+		/**
+		 * L'itÃ©rateur se positionnne sur le pÃ¨re du noeud courant.
+		 * 
+		 * @pre Le noeud courant nâ€™est pas la racine.
+		 */
+		@Override
+		public void goUp() {
+			try {
+				assert !stack.isEmpty() : " la racine n'a pas de pere";
+				currentNode = stack.pop();
+			} catch (AssertionError e) {
+				e.printStackTrace();
+				System.exit(0);
+			}
+		}
+
+		/**
+		 * L'itÃ©rateur se positionne sur la racine de l'arbre.
+		 */
+		@Override
+		public void goRoot() {
+			currentNode = root;
+			stack.clear();
+		}
+
+		/**
+		 * @return true si l'iterateur est sur un sous-arbre vide, false sinon
+		 */
+		@Override
+		public boolean isEmpty() {
+			return currentNode.isEmpty();
+		}
+
+		/**
+		 * @return Le genre du noeud courant.
+		 */
+		@Override
 		public NodeType nodeType() {
 			if (this.isEmpty()) {
 				return NodeType.SENTINEL;
 			}
-			
+
 			this.goLeft();
 			boolean isLeftEmpty = this.isEmpty();
 			this.goUp();
@@ -80,68 +161,127 @@ public abstract class BinaryTree {
 				return NodeType.DOUBLE;
 			}
 		}
-		
-		public void clear() {
-			current.left = null;
-			current.right = null;
-		}
-		
+
+		/**
+		 * Supprimer le noeud courant de l'arbre.
+		 * 
+		 * @pre Le noeud courant n'est pas un noeud double.
+		 */
+		@Override
 		public void remove() {
-			assert this.nodeType() != NodeType.DOUBLE: "Impossible de supprimer un noeud double";
-			switch (this.nodeType()) {
+			try {
+				assert nodeType() != NodeType.DOUBLE : "retirer : retrait d'un noeud double non permis";
+				Element newCurrentNode = null;
+
+				switch (this.nodeType()) {
+				case SENTINEL:
+					return;
 				case LEAF:
-					this.clear();
+					newCurrentNode = new Element();
 					break;
 				case SIMPLE_LEFT:
-					current = current.left;
+					newCurrentNode = currentNode.left;
 					break;
 				case SIMPLE_RIGHT:
-					current = current.right;
+					newCurrentNode = currentNode.right;
 					break;
-				default: break;
+				default:
+					break;
+				}
+
+				currentNode.value = newCurrentNode.value;
+				currentNode.left = newCurrentNode.left;
+				currentNode.right = newCurrentNode.right;
+
+			} catch (AssertionError e) {
+				e.printStackTrace();
+				System.exit(0);
 			}
-			this.goUp();
 		}
-		
-		public int getValue() {
-			return current.value;
+
+		/**
+		 * Vider le sousâ€“arbre rÃ©fÃ©rencÃ© par le noeud courant, qui devient butoir.
+		 */
+		@Override
+		public void clear() {
+			currentNode.value = null;
+			currentNode.left = null;
+			currentNode.right = null;
 		}
-		
-		public void addValue(int value) {
-			assert this.isEmpty(): "Impossible d'ajouter car le noeud courrant n'est pas un butoir";
-			current.value = value;
-			current.left = new Node();
-			current.right = new Node();
+
+		/**
+		 * @return La valeur du noeud courant.
+		 */
+		@Override
+		public T getValue() {
+			return currentNode.value;
 		}
-		
-		public void setValue(int value) {
-			current.value = value;
+
+		/**
+		 * CrÃ©er un nouveau noeud de valeur v Ã cet endroit.
+		 * 
+		 * @pre Le noeud courant est un butoir.
+		 * 
+		 * @param v Valeur Ã ajouter.
+		 */
+
+		@Override
+		public void addValue(T v) {
+			try {
+				assert isEmpty() : "Ajouter : on n'est pas sur un butoir";
+				currentNode.value = v;
+				currentNode.left = new Element();
+				currentNode.right = new Element();
+			} catch (AssertionError e) {
+				e.printStackTrace();
+				System.exit(0);
+			}
 		}
-		
+
+		/**
+		 * Affecter la valeur v au noeud courant.
+		 * 
+		 * @param v La nouvelle valeur du noeud courant.
+		 */
+		@Override
+		public void setValue(T v) {
+			currentNode.value = v;
+		}
+
+		private void ancestor(int i, int j) {
+			try {
+				assert !stack.isEmpty() : "switchValue : argument trop grand";
+			} catch (AssertionError e) {
+				e.printStackTrace();
+				System.exit(0);
+			}
+			Element x = stack.pop();
+			if (j < i) {
+				ancestor(i, j + 1);
+			} else {
+				T v = x.value;
+				x.value = currentNode.value;
+				currentNode.value = v;
+			}
+			stack.push(x);
+		}
+
+		/**
+		 * Ã‰changer les valeurs associÃ©es au noeud courant et Ã son pÃ¨re dâ€™ordre i
+		 * (le noeud courant reste inchangÃ©).
+		 * 
+		 * @pre i>= 0 et racine est pÃ¨re du noeud courant dâ€™ordre >= i.
+		 * 
+		 * @param i ordre du pÃ¨re
+		 */
+		@Override
 		public void switchValue(int i) {
-			int temp = current.value;
-			current.value = root.value;
-			while (i != 0) {
-				this.goUp();
+			if (i < 0) {
+				throw new IllegalArgumentException("switchValue : argument negatif");
 			}
-			root.value = temp;
+			if (i > 0) {
+				ancestor(i, 1);
+			}
 		}
-		
 	}
-	
-	// Racine de l'arbre
-	private Node root;
-	
-	public BinaryTree() {
-		root = new Node();
-	}
-	
-	public boolean isEmpty() {
-		return root.left == null && root.right == null;
-	}
-	
-	public Iterator iterator() {
-		return new Iterator();
-	}
-	
 }

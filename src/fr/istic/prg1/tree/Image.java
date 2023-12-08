@@ -12,7 +12,7 @@ package fr.istic.prg1.tree;
 
 import java.util.Scanner;
 
-import fr.istic.prg1.tree_util.AbstractImage;
+//import fr.istic.prg1.tree_util.AbstractImage;
 import fr.istic.prg1.tree_util.Iterator;
 import fr.istic.prg1.tree_util.Node;
 
@@ -55,15 +55,6 @@ public class Image extends AbstractImage {
 	}
 
 	/**
-	 * Crée une copie temporaire de this et retourne son itérateur
-	 */
-	private Iterator<Node> iteratorClone() {
-		AbstractImage imgTemp = new Image();
-		imgTemp.affect(this);
-		return imgTemp.iterator();
-	}
-
-	/**
 	 * this devient identique à image2.
 	 *
 	 * @param image2 image à copier
@@ -92,11 +83,6 @@ public class Image extends AbstractImage {
 	public void rotate180(AbstractImage image2) {
 		Iterator<Node> it1 = this.iterator();
 		Iterator<Node> it2 = image2.iterator();
-		// Si this == image2, on affecte d'abord this à une autre image
-		// avant de faire la rotation
-		if (this == image2) {
-			it2 = iteratorClone();
-		}
 
 		it1.clear(); // On vide l'arbre avant de faire la rotation
 		rotate180Aux(it1, it2);
@@ -170,11 +156,6 @@ public class Image extends AbstractImage {
 	public void mirrorV(AbstractImage image2) {
 		Iterator<Node> it1 = this.iterator();
 		Iterator<Node> it2 = image2.iterator();
-		// Si this == image2, on affecte d'abord this à une autre image
-		// avant de faire le mirroir
-		if (this == image2) {
-			it2 = iteratorClone();
-		}
 
 		it1.clear(); // On vide l'arbre avant de faire le mirroir
 		mirrorAux(it1, it2, false);
@@ -190,11 +171,6 @@ public class Image extends AbstractImage {
 	public void mirrorH(AbstractImage image2) {
 		Iterator<Node> it1 = this.iterator();
 		Iterator<Node> it2 = image2.iterator();
-		// Si this == image2, on affecte d'abord this à une autre image
-		// avant de faire le mirroir
-		if (this == image2) {
-			it2 = iteratorClone();
-		}
 
 		it1.clear(); // On vide l'arbre avant de faire le mirroir
 		mirrorAux(it1, it2, true);
@@ -247,11 +223,6 @@ public class Image extends AbstractImage {
 		Iterator<Node> it1 = this.iterator();
 		Iterator<Node> it2 = image2.iterator();
 		int compteur = 0;
-		// Si this == image2, on affecte d'abord this à une autre image
-		// avant de faire le zoom
-		if (this == image2) {
-			it2 = iteratorClone();
-		}
 
 		it1.clear();
 		// On descends deux fois à gauche dans la mesure du possible pour tomber dans le
@@ -276,11 +247,6 @@ public class Image extends AbstractImage {
 		Iterator<Node> it1 = this.iterator();
 		Iterator<Node> it2 = image2.iterator();
 		int compteur = 0;
-		// Si this == image2, on affecte d'abord this à une autre image
-		// avant de faire le zoom
-		if (this == image2) {
-			it2 = iteratorClone();
-		}
 
 		it1.clear();
 		if (it2.getValue().state == 0) {
@@ -303,16 +269,6 @@ public class Image extends AbstractImage {
 		Node n2 = it2.getValue();
 		it1.addValue(Node.valueOf(n2.state));
 
-		System.out.println("onCounter -> " + onCounter);
-		System.out.println("offCounter -> " + offCounter);
-		System.out.println("");
-
-		if (n2.state == 0) {
-			offCounter += 1;
-		} else if (n2.state == 1) {
-			onCounter += 1;
-		}
-
 		// Seuls les noeuds de state = 2 ont des fils
 		if (n2.state == 2) {
 			it1.goLeft();
@@ -330,14 +286,15 @@ public class Image extends AbstractImage {
 
 			it1.goUp();
 			it2.goUp();
-		}
 
-		if (profondeur == 16) {
-			it1.clear();
-			int leafState = onCounter > offCounter ? 1 : 0;
-			it1.addValue(Node.valueOf(leafState));
-		}
+			if (profondeur == 16) {
+				it1.clear();
+				// int leafState = leftState > rightState ? leftState : rightState;
+				it1.addValue(Node.valueOf(0));
+				// System.out.println("Profondeur 16 state -> " + leafState);
 
+			}
+		}
 	}
 
 	/**
