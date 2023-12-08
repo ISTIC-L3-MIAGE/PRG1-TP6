@@ -575,7 +575,7 @@ public class Image extends AbstractImage {
 			}
 			middleY = (debutY + finY) / 2;
 
-			// Découpage sur vertical
+			// Découpage vertical
 			if (it.getValue().state == 2) {
 				if (x <= middleX) {
 					it.goLeft();

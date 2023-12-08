@@ -174,8 +174,6 @@ public class BinaryTree<T> {
 				Element newCurrentNode = null;
 
 				switch (this.nodeType()) {
-				case SENTINEL:
-					return;
 				case LEAF:
 					newCurrentNode = new Element();
 					break;
@@ -186,7 +184,7 @@ public class BinaryTree<T> {
 					newCurrentNode = currentNode.right;
 					break;
 				default:
-					break;
+					return;
 				}
 
 				currentNode.value = newCurrentNode.value;
