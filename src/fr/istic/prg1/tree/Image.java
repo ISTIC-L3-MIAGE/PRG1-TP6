@@ -674,11 +674,9 @@ public class Image extends AbstractImage {
 		Node n2 = it2.getValue();
 		// Cas d'arrêt 1: this est totallement allumé et image2 ne l'est pas
 		// Cas d'arrêt 2: this est partiellement allumé et image2 est totallement éteint
-		if ((n1.state == 1 && n2.state != 1) || (n1.state == 2 && n2.state == 0)) {
-			return false;
-		}
-
-		if (n1.state == 2 && n2.state == 2 && inclusion) {
+		if (n2.state != 2) {
+			inclusion &= n1.state == 0 || n2.state == 1;
+		} else if (n1.state == 2 && inclusion) {
 			it1.goLeft();
 			it2.goLeft();
 
