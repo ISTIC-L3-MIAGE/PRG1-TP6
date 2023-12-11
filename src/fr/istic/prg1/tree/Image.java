@@ -262,14 +262,14 @@ public class Image extends AbstractImage {
 				it1.goLeft();
 				counter++;
 			}
-		}
 
-		zoomOutAux(it1, it2, level);
+			zoomOutAux(it1, it2, level);
 
-		if (it1.getValue().state == 0) {
-			it1.goRoot();
-			it1.clear();
-			it1.addValue(Node.valueOf(0));
+			if (it1.getValue().state == 0) {
+				it1.goRoot();
+				it1.clear();
+				it1.addValue(Node.valueOf(0));
+			}
 		}
 	}
 
